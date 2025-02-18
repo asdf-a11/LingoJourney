@@ -1,0 +1,37 @@
+body {
+    width: 300px; 
+    height: 200px; 
+    margin: 0;
+    padding: 0;
+    background-color:rgb(255, 253, 244);
+    font-family: "Times New Roman", Times, serif;
+}
+button{
+    font-size: 15px;
+    color: white;
+    background-color: #8D918D;
+    margin: none;
+    padding: 11px 11px;
+    cursor: pointer;     
+    font-family: "Times New Roman", Times, serif;       
+}
+button:hover{
+    background-color: #636663;        
+}
+.header {
+    padding: 10px; /* some padding */
+    text-align: center; /* center the text */
+    background: #1B998B; /* green background */
+    color: whitesmoke;
+}
+h1{
+    text-align: center;
+    text-decoration: underline;
+}
+.errorText{
+    font-weight: bold;
+    color: red;
+}
+.centerButton{
+    text-align: center;
+}
