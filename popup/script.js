@@ -1,7 +1,8 @@
 const BASIC_TRANSLATION_FILES = [
-    "EnglishRussianTranslations.json"
+    "EnglishRussianTranslations_Incomplete.json"
 ];
 const MAX_NUMBER_OF_FILES = 5;
+
 function SendMessageToBackground(message, func) {
     function ResponseFunction(response) {
         console.log('Response from background:', response);
@@ -19,11 +20,6 @@ function LoadPrevoiseFileNames(){
         prevFileNames: []
     }, function(result) {        
         prevFileNames = result.prevFileNames;
-        console.log("PrevFilenaes", prevFileNames);
-        //if(typeof prevFileNames != Array){
-        //    prevFileNames = [];
-        //    console.log("Invalid prevFileList");
-        //}
         let e = document.getElementById("fileNameList");
         prevFileNames.length = Math.min(prevFileNames.length,MAX_NUMBER_OF_FILES);
         for(let i = 0; i < prevFileNames.length; i++){
@@ -38,7 +34,6 @@ function LoadPrevoiseFileNames(){
                 e.appendChild(b);
             }
         } 
-        console.log("PrevFilenaes", prevFileNames);
     });
 }    
 function VeiwOperationMenu(){

@@ -9,6 +9,8 @@ const updatePage_refreshRate = 1000;//ms
 var routineId;
 //A handle to the popup translation window
 var popupWindow = undefined;
+//Boolean if the user is using the free translation list
+var isUsingFreeTranslationList = false;
 
 //Stores the position and size of the popup translation window
 var translationWindowPositionX = 20;
@@ -123,8 +125,9 @@ function GetWordColour(wordType){
       return "rgba(255, 200, 180, 0.4)";
     case "unknown":
       return "rgba(210, 210, 255, 0.4)";
-  }
-  console.error("not valid word type");
+    default:
+      console.error("Cannot get colour for a invalid word type");
+  }  
 }
 function GetTranslation(wordName){
 
@@ -217,8 +220,7 @@ function AssignFunctionToButtons(buttonIdList){
     button.addEventListener('click', function () {
       let splitList = button.id.split("-");
       let targetWord = splitList[1];     
-      let wordStatus = splitList[2];        
-  
+      let wordStatus = splitList[2];    
       if(popupWindow !== undefined){
         CloseTranslationWindowRoutine(popupWindow, buttonIdList);
         popupWindow.close();
@@ -233,6 +235,7 @@ function AssignFunctionToButtons(buttonIdList){
       popupWindow.document.getElementById("translationParagraph").innerHTML = translationText;
       popupWindow.document.getElementById("wordStatus").innerHTML = wordStatus;      
       popupWindow.document.getElementById("transWords").innerHTML = transWords
+      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;
     });
   });
 }
@@ -299,8 +302,10 @@ function SetRoutine(routineArgument){
   routineId = setInterval(function(){UpdatePage(routineArgument);}, refreshRate);
 }
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log("Content script connected ", request);
   switch(request.type){
+    case "IsFreeTranslationList":
+      isUsingFreeTranslationList = request.isUsingFreeTranslationList;
+      break;
     //Background script is sending the translation window HTML
     case "SendTranslationWindowHTML":
       translationWindowHTML = request.translationWindowHTML;
@@ -324,7 +329,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "SendLearningListSection":
       if(learningWordList === undefined){
         learningWordList = [];
-      }    
+      }   
       learningWordList = learningWordList.concat(request.listSection);
       break;
     //Sends the translation list in chuncks

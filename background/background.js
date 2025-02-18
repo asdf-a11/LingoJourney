@@ -1,50 +1,22 @@
-//var currentTab;
 var definedWordListFlag = false;
-//const youtubeRefreshRate = 2000;//ms
 var sessionTag;
 var language;
 var stats;
-//var youtubeIntervalRunning;
 var currentlyRunningProcess = null;
 var translationInfo = null;
+//Boolean if user is using free translation list
+var isUsingFreeTranslationList = false;
+//List of the names of all free translation list files
+const INCOMPLETE_TRANSLATION_LIST_FILE_NAMES = [
+  "EnglishRussianTranslations_Incomplete.json"
+];
 
 const WORD_SENDING_BLOCK_SIZE = 5000;
 
 var knownWordList = [];
 var learningWordList = [];
 
-/*
-function WordListToArray(wordString){
-  let lst = wordString.split("\n");
-  return lst;
-}
-function DefineWordListRus_inject(code){
-  window.rusWordList = code;
-}
-function DefineWordListEng_inject(code){
-  window.engWordList = code;
-}
-function DefineWordLists(rusWordList, engWordList){
-  chrome.scripting.executeScript({
-    target : {tabId : currentTab.id, allFrames : true},
-    func : DefineWordListRus_inject,
-    args: [rusWordList],
-    world: "MAIN"
-  })
-  chrome.scripting.executeScript({
-    target : {tabId : currentTab.id, allFrames : true},
-    func : DefineWordListEng_inject,
-    args: [engWordList],
-    world: "MAIN"
-  })
-}
-function AttemptDefineWordList(rusWordList, engWordList){
-  if(definedWordListFlag == false){
-    DefineWordLists(rusWordList, engWordList);  
-  }
-  definedWordListFlag = true;
-}
-*/
+
 function RemoveItemOnce(arr, value) {
   var index = arr.indexOf(value);
   if (index > -1) {
@@ -52,72 +24,10 @@ function RemoveItemOnce(arr, value) {
   }
   return arr;
 }
-/*
-function GetCurrentTab(ActionMessage_callback, request, sender, sendResponse){
-  let queryOptions = { active: true, currentWindow: true};
-  chrome.tabs.query(queryOptions, ([tab]) => {
-    if (chrome.runtime.lastError){
-      console.error(chrome.runtime.lastError);    
-    }
-    if(tab === undefined){
-      console.error("tab is undefined");
-    }
-    currentTab = tab;
-    ActionMessage_callback(request, sender, sendResponse);
-  });
-}
-*/
 function ActionMessage(request, sender, sendResponse){
   SendMessageToContentScript(request);
 }
-async function GetTranslationWebPage(word){
-  const url = "https://lingojourney.net/w/Translate.php";
-  const formData = new FormData();
-  formData.append("randomKey", sessionTag);
-  formData.append("translationTable", "EnglishRussianTranslations");
-  formData.append("toTranslateWord", word);
-  const response = await fetch(url, {
-    method: "POST",
-    body: formData
-  });
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const result = await response.text();
-  return {webpage: result};
-}
-/*
-async function GetWordStatusChanges(){
-  const formData = new FormData();
-  formData.append("sessionTag", sessionTag);
-  formData.append("language", language);
-  const url = "https://lingojourney.net/translationWindow/GetWordStatusChanges.php";
-  const response = await fetch(url, {
-      method: "POST",
-      body: formData
-  });
-  if (!response.ok) {
-      throw new Error("Network response was not ok");
-  }
-  const result = await response.text(); 
-  return result;
-}
-  */
 function LoadKnownAndLearningWords(){
-  /*
-  let fileRelPath = "LanguageData/Russian/";
-  let fileNameList = [fileRelPath + "knownWordList.txt", fileRelPath + "learningWordList.txt"];
-  let returnList = [null, null];
-  for(let i = 0; i < fileNameList.length; i++){
-    let link = chrome.runtime.getURL(fileNameList[i]);
-    const response = await fetch(link);
-    let content = await response.text();
-    let splitList = content.split("¬");
-    returnList[i] = splitList;
-  }
-  console.log("loading lists, ",returnList);
-  return returnList;
-  */
   chrome.storage.sync.get({
     learningWordList: [],
     knownWordList: []
@@ -125,20 +35,6 @@ function LoadKnownAndLearningWords(){
     knownWordList = result.knownWordList;
     learningWordList = result.learningWordList;
   });
-}
-async function GetUpdatedWindowSettings(){
-  const formData = new FormData();
-  formData.append("sessionTag", sessionTag);
-  const url = "https://lingojourney.net/GetWindowSettings/GetWindowSettings.php";
-  const response = await fetch(url, {
-    method: "POST",
-    body: formData
-  });
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const result = await response.text();
-  return result;
 }
 async function LoadTranslationWindowHTML(){
   let link = chrome.runtime.getURL("translationWindow/translationWindow.html");
@@ -148,6 +44,14 @@ async function LoadTranslationWindowHTML(){
   return text;
 }
 async function LoadTranslations(fileName, sendResponse){
+  //Checks if user is using free translation list and sets bool acordingly
+  isUsingFreeTranslationList = false;
+  for(let i of INCOMPLETE_TRANSLATION_LIST_FILE_NAMES){
+    if(fileName == i){
+      isUsingFreeTranslationList = true;
+      break;
+    }
+  }
   let filePath = "LanguageData/"+fileName
   let link = chrome.runtime.getURL(filePath);
   let response = undefined;
@@ -165,18 +69,6 @@ async function LoadTranslations(fileName, sendResponse){
   }
   sendResponse({type: "LoadingTranslationDataSucc", status: succ});
 }
-/*
-async function CheckIfLoadLanguageTranslations(
-  callbackFunction,  request, sender, sendResponse
-){
-  if(translationInfo === null){
-    await LoadTranslations();
-  }
-  if(translationInfo !== null){
-    callbackFunction(request, sender, sendResponse);
-  }
-}
-  */
 function SendMessageToContentScript(message, onReciveFunc=undefined) {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     if (tabs.length > 0) {
@@ -238,56 +130,18 @@ function HandleWordStatusChange(word, wordStatus){
   });
 }
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    //console.log("Connected .....", request);
     switch(request.type){
-      /*
-      case "IsLoggedIn":
-        sendResponse({loggedIn: sessionTag});
-        break;
-      case "SetData":
-        sessionTag = request.sessionTag;
-        language = request.language;
-        break;
-      */
       case "LoadTranslationData":
-        LoadTranslations(request.fileName, sendResponse);
-        console.log("Sending response");        
-        //return true;
+        LoadTranslations(request.fileName, sendResponse);      
         break;
       case "WordStatusChange":
         HandleWordStatusChange(request.word, request.wordStatus);
         break;
-      /*case "Ping":
-        sendResponse({data:"pong"});
-        break;*/
-      /*
-      case "GetLanguage":
-        sendResponse({language: language});
-        break;
-      */
-      case "GetUpdatedWindowSettings":
-        GetUpdatedWindowSettings().then((result)=>{
-          sendResponse({webpage:result});
-        });
-        break;
-      /*
-      case "GetWordStatusChanges":
-        GetWordStatusChanges().then((result) => {
-          sendResponse({webpage: result});
-        });    
-        break;
-      */
       case "GetSessionTag":
         sendResponse({sessionTag:sessionTag});
         break;
       case "IsYoutubeIntervalRunning":
         sendResponse({data: youtubeIntervalRunning});
-        break;
-      case "GetWordLists":
-        GetWordListsWebPage().then(data=>{
-          console.log("send back", data);
-          sendResponse(data);
-        });
         break;
       case "CancleYoutubeRoutine":
         currentlyRunningProcess = null;
@@ -307,11 +161,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             currentlyRunningProcess = "youtubeRoutine";
           }
         }
-        //GetCurrentTab(
-        //  function(request, sender, sendResponse){
         SendMessageToContentScript({type: "HasTranslationInfo"}, async function(response){
-          console.log(response);
-          console.log("response to background, ", response.answer);
           if(response.answer == false){//send translation info
             await SendLargeArrayToContentScript("SendTranslationInfoSection", translationInfo);
           }
@@ -324,35 +174,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               type: "SendTranslationWindowHTML",
               translationWindowHTML: await LoadTranslationWindowHTML()
             });
+            SendMessageToContentScript({
+              type: "IsFreeTranslationList",
+              isUsingFreeTranslationList: isUsingFreeTranslationList
+            });
             ActionMessage(request, sender, sendResponse);
           });
-        });
-        //  },  request, sender, sendResponse);   
-        /*        
-        GetCurrentTab(
-          function(request, sender, sendResponse){
-            CheckIfLoadLanguageTranslations(async function(request, sender, sendResponse){
-                SendMessageToContentScript({type: "HasTranslationInfo"}, async function(response){
-                  console.log(response);
-                  console.log("response to background, ", response.answer);
-                  if(response.answer == false){//send translation info
-                    await SendLargeArrayToContentScript("SendTranslationInfoSection", translationInfo);
-                  }
-                  SendMessageToContentScript({type: "HasKnownWordList"}, async function(response){
-                    if(response.answer == false){//send both known word list and learning word list
-                      await SendLargeArrayToContentScript("SendKnownListSection", knownWordList);
-                      await SendLargeArrayToContentScript("SendLearningListSection", learningWordList);
-                    }
-                    SendMessageToContentScript({
-                      type: "SendTranslationWindowHTML",
-                      translationWindowHTML: await LoadTranslationWindowHTML()
-                    });
-                    ActionMessage(request, sender, sendResponse);
-                  });
-                });
-              }, request, sender, sendResponse);
-          },  request, sender, sendResponse);    
-        */     
+        });   
         break;
       default:
         console.error("Invalid type -> ", request.type);
