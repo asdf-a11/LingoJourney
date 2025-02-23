@@ -2,10 +2,10 @@ const BASIC_TRANSLATION_FILES = [
     "EnglishRussianTranslations_Incomplete.json"
 ];
 const MAX_NUMBER_OF_FILES = 5;
+var prevFileNames = undefined;
 
 function SendMessageToBackground(message, func) {
     function ResponseFunction(response) {
-        console.log('Response from background:', response);
         func(response);        
     }
     let a = undefined;
@@ -13,8 +13,7 @@ function SendMessageToBackground(message, func) {
         a = ResponseFunction;
     }
     chrome.runtime.sendMessage(message, a);
-}   
-var prevFileNames = undefined;
+}
 function LoadPrevoiseFileNames(){
     chrome.storage.sync.get({
         prevFileNames: []
@@ -51,25 +50,17 @@ function OnSelectedTranslationFile(){
     }
     chrome.storage.sync.set({
         prevFileNames: prevFileNames
-    }, function() {
-        console.log("Svaed prevfileNames, ", prevFileNames);
-    });
-    console.log("file Name, ", fileName);
+    }, function() {  });
     SendMessageToBackground({
         type: "LoadTranslationData",
         fileName: fileName
     }, function(request){
-        //console.log("Recived response", request);
-        //console.log(document);
-        //console.log(document.getElementById("LoadSucc"));
         document.getElementById("LoadSucc").hidden = request.status;
         if(request.status == false){
             VeiwSelectTranslationFile();
-            //document.getElementById("LoadSucc").style.visibility = "visable";
         }
         else{
             VeiwOperationMenu();
-            //document.getElementById("LoadSucc").style.visibility = "hidden";
         }
     });    
 }
@@ -85,15 +76,3 @@ window.onload = function(){
     document.getElementById("WordifyWholePage_button").onclick = OnWordifyWholePage;
     document.getElementById("WordifyYoutube_button").onclick = OnWordifyYoutube;
 }
-/*
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log("Invoking thing");
-    switch(request.type){
-        case "LoadingTranslationDataSucc":
-
-            break;
-        default:
-            console.error("Invalid message sent to popup window (", request.type, ")");
-    }
-    return false;
-});*/

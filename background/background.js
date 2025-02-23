@@ -1,7 +1,3 @@
-var definedWordListFlag = false;
-var sessionTag;
-var language;
-var stats;
 var currentlyRunningProcess = null;
 var translationInfo = null;
 //Boolean if user is using free translation list
@@ -11,6 +7,7 @@ const INCOMPLETE_TRANSLATION_LIST_FILE_NAMES = [
   "EnglishRussianTranslations_Incomplete.json"
 ];
 
+//The max number of elements sent in a single transfer
 const WORD_SENDING_BLOCK_SIZE = 5000;
 
 var knownWordList = [];
@@ -40,7 +37,6 @@ async function LoadTranslationWindowHTML(){
   let link = chrome.runtime.getURL("translationWindow/translationWindow.html");
   const response = await fetch(link);
   let text = await response.text();
-  console.log("translation window HTML -> ", text);
   return text;
 }
 async function LoadTranslations(fileName, sendResponse){
