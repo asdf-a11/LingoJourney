@@ -226,6 +226,7 @@ function AssignFunctionToButtons(buttonIdList){
         popupWindow.close();
       }
       //TODO very bad and can use chrome.create window or something instead
+      /*
       chrome.windows.create({
           url: "",//popup.html
           type: "popup",
@@ -243,7 +244,7 @@ function AssignFunctionToButtons(buttonIdList){
         popupWindow.document.getElementById("transWords").innerHTML = transWords
         popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;
       });
-      /*
+      */      
       popupWindow = window.open("",
         "", "width="+translationWindowSizeX.toString()+",height="+translationWindowSizeY.toString()+
         ",left="+translationWindowPositionX.toString()+",top="+translationWindowPositionY.toString()
@@ -254,8 +255,7 @@ function AssignFunctionToButtons(buttonIdList){
       popupWindow.document.getElementById("translationParagraph").innerHTML = translationText;
       popupWindow.document.getElementById("wordStatus").innerHTML = wordStatus;      
       popupWindow.document.getElementById("transWords").innerHTML = transWords
-      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;
-      */
+      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;      
     });
   });
 }
