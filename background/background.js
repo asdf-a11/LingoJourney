@@ -1,3 +1,4 @@
+//"matches": ["<all_urls>"],
 var currentlyRunningProcess = null;
 var translationInfo = null;
 //Boolean if user is using free translation list
