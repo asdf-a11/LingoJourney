@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Lingo Journey",
     "version": "1.0.0",
-    "permissions": ["storage", "activeTab"],
+    "permissions": ["storage"],
     "action":{
         "default_popup": "popup/index.html",
         "default_title": "Lingo Journey"
