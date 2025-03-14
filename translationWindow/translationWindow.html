@@ -1,62 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body{
-            background-color: rgb(255, 253, 244);
-        }
-        p{
-            font-family: "Times New Roman";
-        }
-        h1{
-            text-align: center;
-            font-family: "Times New Roman";
-        }
-        h3{
-            text-align: center;
-            font-family: "Times New Roman";
-        }
-        .wordStatus{
-            display: flex;
-        }
-        .wordStatusButton_notSelected{
-            background-color: gray;
-        }
-        .wordStatusButton_selected{
-            background-color: #FFD700;
-        }
-    </style>
-    <title>Lingo Journey word viewer</title>  
+    <link rel="stylesheet" href="translationWindowStyle.css">
+    <title>Lingo Journey translation window</title>  
+    <!--<script src="translationWindow/translationWindowScript.js"> </script>-->
+    <meta charset="utf-8">
+    <script src="translationWindowScript.js"></script>
 </head>
 <body>      
     <noscript>You need to enable JavaScript for Lingo Journey to work.</noscript>
     <h1 id="targetWordTitle">...</h1>
     <hr>
-    <p>Current word status:</p>
-    <p id="wordStatus">...</p>
     <div class="wordStatus">
-        <button id="learningButton" class="LEARNING_BUTTON_CLASS" onclick="
-            document.getElementById('wordStatus').textContent = 'learning'
-        ">Learning</button>
-        <button id="knownButton" class="KNOWN_BUTTON_CLASS" onclick="
-            document.getElementById('wordStatus').textContent = 'known'
-        ">Known</button>
-        <button id="unknownButton" class="UNKNOWN_BUTTON_CLASS" onclick="
-            document.getElementById('wordStatus').textContent = 'not known'
-        ">Unknown</button>
+        <button id="learningButton">Learning</button>
+        <button id="knownButton">Known</button>
+        <button id="unknownButton">Unknown</button>
     </div>
-    <hr>
     <p id="transWords">...</p>
     <hr>
-    <p id="translationParagraph">...</p>
+    <p id="translationParagraph_display">...</p>
     <br>
     <div hidden id="UsingFreeTranslationList">
-        <p style="color:red;">
+        <p class="errorColour">
             <b>
                 You are using the free translation list, if some words dont have translations you can
                 download a more complete translation list from <a href="https://patreon.com/LingoJourney">here</a> and help support the creator of Lingo Journey.
             </b> 
         </p>
     </div>  
+    <p id="newWordStatus" hidden>learning</p>
+    <p id="targetLangWord" hidden>Empty</p>
+    <p id="isUsingFreeTranslationList" hidden>false</p>
+    <p id="oldWordStatus" hidden>Empty</p>
+    <p id="translationParagraph" hidden>Empty</p>
+    <p id="translationShort" hidden>Empty</p>
 </body>
 </html>

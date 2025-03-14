@@ -130,7 +130,6 @@ function GetWordColour(wordType){
   }  
 }
 function GetTranslation(wordName){
-
   for(let i = 0; i < translationInfo.length; i++){
     if(translationInfo[i].targetLangWord === wordName){
       return [translationInfo[i].description, translationInfo[i].transWords];
@@ -220,31 +219,17 @@ function AssignFunctionToButtons(buttonIdList){
     button.addEventListener('click', function () {
       let splitList = button.id.split("-");
       let targetWord = splitList[1];     
-      let wordStatus = splitList[2];    
+      let wordStatus = splitList[2];   
+      SendMessageToBackground({
+        type: "WordClickEvent",
+        targetWord: targetWord,
+        wordStatus: wordStatus
+      });
+      /*
       if(popupWindow !== undefined){
         CloseTranslationWindowRoutine(popupWindow, buttonIdList);
         popupWindow.close();
-      }
-      //TODO very bad and can use chrome.create window or something instead
-      /*
-      chrome.windows.create({
-          url: "",//popup.html
-          type: "popup",
-          width: translationWindowSizeX.toString(),
-          height: translationWindowSizeY.toString(),
-          left: translationWindowPositionX.toString(),
-          top: translationWindowPositionY.toString()
-      }, function(newWindow) {
-        popupWindow = newWindow;
-        let [translationText, transWords] = GetTranslation(targetWord);
-        popupWindow.document.write(translationWindowHTML);
-        popupWindow.document.getElementById("targetWordTitle").innerHTML = targetWord;
-        popupWindow.document.getElementById("translationParagraph").innerHTML = translationText;
-        popupWindow.document.getElementById("wordStatus").innerHTML = wordStatus;      
-        popupWindow.document.getElementById("transWords").innerHTML = transWords
-        popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;
-      });
-      */      
+      }   
       popupWindow = window.open("",
         "", "width="+translationWindowSizeX.toString()+",height="+translationWindowSizeY.toString()+
         ",left="+translationWindowPositionX.toString()+",top="+translationWindowPositionY.toString()
@@ -255,7 +240,8 @@ function AssignFunctionToButtons(buttonIdList){
       popupWindow.document.getElementById("translationParagraph").innerHTML = translationText;
       popupWindow.document.getElementById("wordStatus").innerHTML = wordStatus;      
       popupWindow.document.getElementById("transWords").innerHTML = transWords
-      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;      
+      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;   
+      */   
     });
   });
 }
@@ -374,7 +360,5 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       }
       clearInterval(routineId);
       break;
-    default:
-      console.error("Invalid type -> ", request.type);
   }
 });
