@@ -23,6 +23,17 @@ const WORD_SENDING_BLOCK_SIZE = 5000;
 var knownWordList = [];
 //Holds the list of the users learning words
 var learningWordList = [];
+//Stores the info for currently clicked word so to send to translation window
+var currentlyClickedWord = {
+  targetLangWord: "",
+  isUsingFreeTranslationList: "",
+  oldWordStatus: "",
+  translationParagraph: "",
+  translationShort: ""
+};
+//Stores the tab id of the last content script tab
+//Done because not active when translation window is sending to background script so need to store id
+var contentScriptTabId = null;
 
 
 function RemoveItemOnce(arr, value) {
@@ -97,45 +108,6 @@ async function SendLargeArrayToContentScript(messageTypeName, arrayToSend){
     start = end;
   }while(end != arrayToSend.length);  
 }
-//When the translation window has been closed and might need to change
-//thes status of a word
-function HandleWordStatusChange(word, wordStatus){
-  let index;
-  switch(wordStatus){
-    case "known":
-      index = knownWordList.indexOf(word);
-      if(index == -1){//needs to be added to word List
-        knownWordList.push(word);
-      }
-      index = learningWordList.indexOf(word);
-      if(index != -1){
-        learningWordList.splice(index, 1);
-      }
-      break;
-    case "learning":
-      index = learningWordList.indexOf(word);
-      if(index == -1){//needs to be added to learinging List
-        learningWordList.push(word);
-      }
-      index = knownWordList.indexOf(word);
-      if(index != -1){
-        knownWordList.splice(index, 1);
-      }
-      break;
-    case "unknown":
-      knownWordList = RemoveItemOnce(knownWordList, word);
-      learningWordList = RemoveItemOnce(learningWordList, word);
-      break;
-    default:
-      console.error("Invalid word Status when handling word status change");
-  }
-  chrome.storage.sync.set({
-    learningWordList: learningWordList,
-    knownWordList: knownWordList
-  }, function() {
-    console.log("Updated word lists word " + word + "  ,  " + wordStatus);
-  });
-}
 function GetTranslation(wordName){
   for(let i = 0; i < translationInfo.length; i++){
     if(translationInfo[i].targetLangWord === wordName){
@@ -145,12 +117,46 @@ function GetTranslation(wordName){
   return ["No Translation of \""+wordName+"\" found. :(", "..."];
 }
 function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
-
+  let index;
+  switch(newStatus){
+    case "known":
+      index = knownWordList.indexOf(targetWord);
+      if(index == -1){//needs to be added to word List
+        knownWordList.push(targetWord);
+      }
+      index = learningWordList.indexOf(targetWord);
+      if(index != -1){
+        learningWordList.splice(index, 1);
+      }
+      break;
+    case "learning":
+      index = learningWordList.indexOf(targetWord);
+      if(index == -1){//needs to be added to learinging List
+        learningWordList.push(targetWord);
+      }
+      index = knownWordList.indexOf(targetWord);
+      if(index != -1){
+        knownWordList.splice(index, 1);
+      }
+      break;
+    case "unknown":
+      knownWordList = RemoveItemOnce(knownWordList, targetWord);
+      learningWordList = RemoveItemOnce(learningWordList, targetWord);
+      break;
+    default:
+      console.error("Invalid word Status when handling word status change -> ", newStatus);
+  }
+  chrome.storage.sync.set({
+    learningWordList: learningWordList,
+    knownWordList: knownWordList
+  }, function() {
+    console.log("Updated word lists word " + targetWord + "  ,  " + newStatus);
+  });
 }
 async function DisplayTranslationWindow(targetWord, wordStatus){
   //If window allready open then close it
   if(translationWindow !== null){
-
+    chrome.windows.remove(translationWindow.id);
   }
   //Load Translation window if not allready loaded
   if(translationWindowHTML === null){
@@ -158,17 +164,15 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
   }  
   //Write data into the translation window
   let [translationParagraph, translationShort] = GetTranslation(targetWord);
-  let translationWindowHTML_withData = translationWindowHTML
-    + "\t\t<p id=\"targetLangWord\" hidden>"+targetWord+"</p>\n"
-    + "\t\t<p id=\"oldWordStatus\" hidden>"+wordStatus+"</p>\n"
-    + "\t\t<p id=\"translationParagraph\" hidden>"+translationParagraph+"</p>\n"
-    + "\t\t<p id=\"translationShort\" hidden>"+translationShort+"</p>\n"
-    + "\t\t<p id=\"isUsingFreeTranslationList\" hidden>"+isUsingFreeTranslationList.toString()+"</p>\n"
-    + "\t</body>\n"
-  ;
+  //Set the current word infomation into global varaible
+  currentlyClickedWord.targetLangWord = targetWord;
+  currentlyClickedWord.translationParagraph = translationParagraph;
+  currentlyClickedWord.translationShort = translationShort;
+  currentlyClickedWord.oldWordStatus = wordStatus;
+  currentlyClickedWord.isUsingFreeTranslationList = isUsingFreeTranslationList;
   //Create the popup window
   chrome.windows.create({
-    url: chrome.runtime.getURL("translationWindow/translationWindow.html"),//"data:text/html,<html>"+translationWindowHTML_withData+"</html>"
+    url: chrome.runtime.getURL("translationWindow/translationWindow.html"),
     type: "popup",
     focused: true,
     width: translationWindowSizeX,
@@ -177,7 +181,7 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
     top: translationWindowPosY
   }, function(newWindow) {
     translationWindow = newWindow;   
-    //attach listener for when windows bounds change
+    //Attach listener for when windows bounds change
     chrome.windows.onBoundsChanged.addListener(function(win) {
       chrome.windows.get(win.id, function(updatedWin) {
         translationWindowPosX = updatedWin.left;
@@ -186,29 +190,19 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
         translationWindowSizeY = updatedWin.height;
       });
     }); 
-    //attach listen for when window is closed.  
-    chrome.windows.onRemoved.addListener(function (windowId) {
-      if (windowId === translationWindow.id) {
-        SendMessageToContentScript({
-          type: "GetNewWordStatus"
-        }, function(response){
-          UpdateStatusOfWord(response.targetWord, response.prevWordStatus, response.newWordStatus);
-        })
-        translationWindow = null;
-      }
-    }); 
   });
 }
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+function SetContentScriptTabId(){
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      contentScriptTabId = tabs[0].id;
+    }
+  });
+}
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){
       case "LoadTranslationData":
         LoadTranslations(request.fileName, sendResponse);      
-        break;
-      case "WordStatusChange":
-        HandleWordStatusChange(request.word, request.wordStatus);
-        break;
-      case "GetSessionTag":
-        sendResponse({sessionTag:sessionTag});
         break;
       case "IsYoutubeIntervalRunning":
         sendResponse({data: youtubeIntervalRunning});
@@ -218,8 +212,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         SendMessageToContentScript({type: "CancleRoutine"});
         break;
       case "WordClickEvent":
-        //HandleWordClickEvent(request.targetWord);
+        SetContentScriptTabId();
         DisplayTranslationWindow(request.targetWord, request.wordStatus);
+        break;
+      case "GetInfoForTranslationWindow":
+        sendResponse(currentlyClickedWord);
+        break;
+      case "SendingClosingTranslationWindowInfo":
+        UpdateStatusOfWord(request.targetLangWord, request.oldWordStatus, request.newWordStatus);
+        chrome.tabs.sendMessage(contentScriptTabId, {
+            type: "UpdateWordColours",
+            targetLangWord: request.targetLangWord,
+            newWordStatus: request.newWordStatus
+        }
+        , (response) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error sending message:", chrome.runtime.lastError.message);
+            } else {
+                console.log("Response from content script:", response);
+            }
+        });
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":

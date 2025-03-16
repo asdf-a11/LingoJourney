@@ -22,6 +22,8 @@ var translationWindowSizeY = 800;
 var translationInfo = undefined;
 //Stores a string for the html of the popup translation window
 var translationWindowHTML = undefined;
+//A list of all buttons on the webpage
+var buttonIdList = [];
 
 //Remove one item from the array
 function RemoveItemFromArray(arr, item){  
@@ -224,24 +226,7 @@ function AssignFunctionToButtons(buttonIdList){
         type: "WordClickEvent",
         targetWord: targetWord,
         wordStatus: wordStatus
-      });
-      /*
-      if(popupWindow !== undefined){
-        CloseTranslationWindowRoutine(popupWindow, buttonIdList);
-        popupWindow.close();
-      }   
-      popupWindow = window.open("",
-        "", "width="+translationWindowSizeX.toString()+",height="+translationWindowSizeY.toString()+
-        ",left="+translationWindowPositionX.toString()+",top="+translationWindowPositionY.toString()
-      );
-      let [translationText, transWords] = GetTranslation(targetWord);
-      popupWindow.document.write(translationWindowHTML);
-      popupWindow.document.getElementById("targetWordTitle").innerHTML = targetWord;
-      popupWindow.document.getElementById("translationParagraph").innerHTML = translationText;
-      popupWindow.document.getElementById("wordStatus").innerHTML = wordStatus;      
-      popupWindow.document.getElementById("transWords").innerHTML = transWords
-      popupWindow.document.getElementById("UsingFreeTranslationList").hidden = !isUsingFreeTranslationList;   
-      */   
+      }); 
     });
   });
 }
@@ -260,7 +245,7 @@ function SendMessageToBackground(message, onResponseFunction){
 function Wordify(argument){
   const BUTTON_ID_STRING = "buttonIdString";
   textElements = GetElementsToEdit(argument);
-  var buttonIdList = [];
+  buttonIdList = [];
   for(let elementCounter in textElements){
     let currentElement = textElements[elementCounter];
     let currentElementStyle = window.getComputedStyle(currentElement);
@@ -344,6 +329,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         translationInfo = [];
       }
       translationInfo = translationInfo.concat(request.listSection);   
+      break;
+    case "UpdateWordColours":
+      console.log("Should be updating colours");
+      UpdateAllButtonColours(request.targetLangWord, request.newWordStatus, buttonIdList);
       break;
     //Wordifies the page
     case "StartUpdatePage":

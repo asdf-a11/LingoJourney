@@ -3,6 +3,7 @@ var translationParagraph = null;
 var translationShort = null;
 var oldWordStatus = null;
 var newWordStatus = null;
+var isUsingFreeTranslationList = null;
 
 function SendMessageToBackground(message, onResponseFunction){
     chrome.runtime.sendMessage(message, function(response) {
@@ -26,7 +27,6 @@ function SetButtonColour(){
 }
 function OnWordStatusButtonClicked(newWordStatus_arg){
     newWordStatus = newWordStatus_arg;
-    document.getElementById("newWordStatus").innerHTML = newWordStatus;
     SetButtonColour();
 }
 function AttachClickFunctionToButtons(){
@@ -34,15 +34,8 @@ function AttachClickFunctionToButtons(){
     document.getElementById("knownButton").onclick = function(){OnWordStatusButtonClicked("known");};
     document.getElementById("unknownButton").onclick = function(){OnWordStatusButtonClicked("unknown");};
 }
-function LoadData(){
-    targetLangWord = document.getElementById("targetLangWord").innerHTML;
-    oldWordStatus = document.getElementById("oldWordStatus").innerHTML;
-    translationParagraph = document.getElementById("translationParagraph").innerHTML;
-    translationShort = document.getElementById("translationShort").innerHTML;
-}
-function IfFreeTranslationListDisplayMessage(){
-    let isFreeTranslationList = document.getElementById("isUsingFreeTranslationList").innerHTML == "true";
-    if(isFreeTranslationList){
+function ShowMessageIfFreeTranslationList(){
+    if(isUsingFreeTranslationList === true){
         document.getElementById("UsingFreeTranslationList").hidden = false;
     }
 }
@@ -50,23 +43,37 @@ function DisplayTranslationsAndTitle(){
     document.getElementById("translationParagraph_display").innerHTML = translationParagraph;
     document.getElementById("transWords").innerHTML = translationShort;
     document.getElementById("targetWordTitle").innerHTML = targetLangWord;
-}       
-//Recives messages from the background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    switch(message.type){
-        case "GetNewWordStatus":
-            SendMessageToBackground({
-                newWordStatus: document.getElementById("newWordStatus").innerHTML,
-                targetWord: document.getElementById("targetLangWord").innerHTML,
-                newWordStatus: document.getElementById("newWordStatus").innerHTML
-            });
-            break;
+}  
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action === "CloseTranslationWindow") {
+        window.close();
     }
-});
-window.onload = function(){
-    LoadData();       
-    AttachClickFunctionToButtons();     
-    SetButtonColour();
-    IfFreeTranslationListDisplayMessage();
-    DisplayTranslationsAndTitle();
+});     
+window.onload = function(){      
+    chrome.runtime.sendMessage({ type: "GetInfoForTranslationWindow" }, (message) => {
+        //Move values into global varaibles
+        targetLangWord = message.targetLangWord;
+        isUsingFreeTranslationList = message.isUsingFreeTranslationList;
+        oldWordStatus = message.oldWordStatus;
+        translationParagraph = message.translationParagraph;
+        translationShort = message.translationShort;
+        //Unknown words auto set to learning
+        newWordStatus = oldWordStatus;
+        if(newWordStatus == "unknown"){
+            newWordStatus = "learning";
+        }
+        //
+        AttachClickFunctionToButtons();     
+        SetButtonColour();
+        ShowMessageIfFreeTranslationList();
+        DisplayTranslationsAndTitle();
+    });
+}
+window.onbeforeunload = function(){
+    chrome.runtime.sendMessage({
+        type: "SendingClosingTranslationWindowInfo",
+        targetLangWord: targetLangWord,
+        oldWordStatus: oldWordStatus,
+        newWordStatus: newWordStatus
+    });
 }
