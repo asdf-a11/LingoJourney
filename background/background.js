@@ -157,7 +157,6 @@ function GetClosestString(searchString, stringList, threshold){
       });
     }
   }
-  console.log("Index list", indexList);
   if(indexList.length !== 0){
     let minTotalCost = indexList[0].totalCost;
     let indexOfMin = 0;
@@ -167,7 +166,6 @@ function GetClosestString(searchString, stringList, threshold){
         indexOfMin = i;
       }
     }
-    console.log("returning", indexList[indexOfMin].index);
     return indexList[indexOfMin].index;
   }
   return undefined;
@@ -183,9 +181,8 @@ function GetTranslation(wordName){
       };
     }
   }
-  let closestWordIndex = GetClosestString(wordName, translationTargetWordNameList, SEARCH_THREAHOLD );
+  let closestWordIndex = GetClosestString(wordName, translationTargetWordNameList, SEARCH_THREAHOLD);
   if(closestWordIndex !== undefined){
-    console.log("closest word index", closestWordIndex);
     return {
       paragraph: translationInfo[closestWordIndex].description,
       short: translationInfo[closestWordIndex].transWords,
@@ -322,6 +319,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 console.log("Response from content script:", response);
             }
         });
+        break;
+      case "GetKnownWordList":
+        sendResponse({knownWordList: knownWordList});
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":

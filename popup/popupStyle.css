@@ -13,7 +13,8 @@ button{
     margin: none;
     padding: 11px 11px;
     cursor: pointer;     
-    font-family: "Times New Roman", Times, serif;       
+    font-family: "Times New Roman", Times, serif;   
+    display:block;    
 }
 button:hover{
     background-color: #636663;        
@@ -34,4 +35,12 @@ h1{
 }
 .centerButton{
     text-align: center;
+}
+.optionInfo{
+    display: none;
+}
+button:hover + .optionInfo{
+    display: block;
+    color: red;
+    font-family: "Times New Roman";
 }
