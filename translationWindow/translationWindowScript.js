@@ -4,6 +4,8 @@ var translationShort = null;
 var oldWordStatus = null;
 var newWordStatus = null;
 var isUsingFreeTranslationList = null;
+var isExactWord = null;
+var approximationWord = null;
 
 function SendMessageToBackground(message, onResponseFunction){
     chrome.runtime.sendMessage(message, function(response) {
@@ -44,6 +46,14 @@ function DisplayTranslationsAndTitle(){
     document.getElementById("transWords").innerHTML = translationShort;
     document.getElementById("targetWordTitle").innerHTML = targetLangWord;
 }  
+function HandleIsNotExactWordMessage(){
+    if(isExactWord === false){
+        //Show the not exact message
+        document.getElementById("NotExactTranslation").hidden = false;
+        //Display word that is being approximated too
+        document.getElementById("ApproxAs").textContent = approximationWord;
+    }
+}
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "CloseTranslationWindow") {
         window.close();
@@ -57,6 +67,8 @@ window.onload = function(){
         oldWordStatus = message.oldWordStatus;
         translationParagraph = message.translationParagraph;
         translationShort = message.translationShort;
+        isExactWord = message.isExactWord;
+        approximationWord = message.approximationWord;
         //Unknown words auto set to learning
         newWordStatus = oldWordStatus;
         if(newWordStatus == "unknown"){
@@ -67,6 +79,7 @@ window.onload = function(){
         SetButtonColour();
         ShowMessageIfFreeTranslationList();
         DisplayTranslationsAndTitle();
+        HandleIsNotExactWordMessage();
     });
 }
 window.onbeforeunload = function(){

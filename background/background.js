@@ -1,5 +1,8 @@
 var currentlyRunningProcess = null;
+//List of objects wich stores a list of all the translations
 var translationInfo = null;
+//A list of names of the words in translation info for word searching
+var translationTargetWordNameList = null;
 //global to the current translation window
 var translationWindow = null;
 //Boolean if user is using free translation list
@@ -19,6 +22,8 @@ const INCOMPLETE_TRANSLATION_LIST_FILE_NAMES = [
 ];
 //The max number of elements sent in a single transfer
 const WORD_SENDING_BLOCK_SIZE = 5000;
+//Threshold for which a word has to pass to be considerd as similer if exact translation cant be found
+const SEARCH_THREAHOLD = 5;
 //Holds the list of the users known words
 var knownWordList = [];
 //Holds the list of the users learning words
@@ -29,7 +34,9 @@ var currentlyClickedWord = {
   isUsingFreeTranslationList: "",
   oldWordStatus: "",
   translationParagraph: "",
-  translationShort: ""
+  translationShort: "",
+  isExactWord: true,
+  approximationWord: undefined
 };
 //Stores the tab id of the last content script tab
 //Done because not active when translation window is sending to background script so need to store id
@@ -84,6 +91,11 @@ async function LoadTranslations(fileName, sendResponse){
   if(response !== undefined){
     let content = await response.text();
     translationInfo = JSON.parse(content);
+    //Compiles a list of names of the target lang words
+    translationTargetWordNameList = [];
+    for(let i of translationInfo){
+      translationTargetWordNameList.push(i.targetLangWord);
+    }
   }
   sendResponse({type: "LoadingTranslationDataSucc", status: succ});
 }
@@ -108,13 +120,85 @@ async function SendLargeArrayToContentScript(messageTypeName, arrayToSend){
     start = end;
   }while(end != arrayToSend.length);  
 }
+//-1 if above threshold else returns the total cost (higher is worse)
+function CompareStrings(string1, string2, threshold){
+  const WRONG_LETTER_COST = 3.0;
+  const TOO_SHORT_COST = 1.0;
+  const OVERWEIGHT_FRONT = 0.2;
+  let minWordLength = Math.min(string1.length, string2.length);
+  let maxWordLength = Math.max(string1.length, string2.length);
+  let totalCost = 0;
+  for(let i = 0; i < minWordLength; i++){
+    if(string1[i] != string2[i]){
+      totalCost += WRONG_LETTER_COST * OVERWEIGHT_FRONT * (maxWordLength - i);
+      if(totalCost > threshold){
+        return -1;
+      }
+    }
+  }
+  let differenceInLength = Math.abs(string1.length - string2.length);
+  totalCost += differenceInLength * TOO_SHORT_COST;
+  if(totalCost <= threshold){
+    return totalCost;
+  }
+  return -1;
+}
+//seach string is the string being compared against
+//string list is the list of all strings which to be found closest
+//threshold is the minimum amount of closness to even be considerd
+function GetClosestString(searchString, stringList, threshold){
+  let indexList = [];
+  for(let i = 0; i < stringList.length; i++){
+    let totalCost = CompareStrings(searchString, stringList[i], threshold);
+    if(totalCost != -1){
+      indexList.push({
+        totalCost: totalCost,
+        index: i
+      });
+    }
+  }
+  console.log("Index list", indexList);
+  if(indexList.length !== 0){
+    let minTotalCost = indexList[0].totalCost;
+    let indexOfMin = 0;
+    for(let i = 1; i < indexList.length; i++){
+      if(indexList[i].totalCost < minTotalCost){
+        minTotalCost = indexList[i].totalCost;
+        indexOfMin = i;
+      }
+    }
+    console.log("returning", indexList[indexOfMin].index);
+    return indexList[indexOfMin].index;
+  }
+  return undefined;
+}
 function GetTranslation(wordName){
   for(let i = 0; i < translationInfo.length; i++){
     if(translationInfo[i].targetLangWord === wordName){
-      return [translationInfo[i].description, translationInfo[i].transWords];
+      return {
+        paragraph: translationInfo[i].description,
+        short: translationInfo[i].transWords,
+        isExactWord: true,
+        approxAsWord: undefined
+      };
     }
   }
-  return ["No Translation of \""+wordName+"\" found. :(", "..."];
+  let closestWordIndex = GetClosestString(wordName, translationTargetWordNameList, SEARCH_THREAHOLD );
+  if(closestWordIndex !== undefined){
+    console.log("closest word index", closestWordIndex);
+    return {
+      paragraph: translationInfo[closestWordIndex].description,
+      short: translationInfo[closestWordIndex].transWords,
+      isExactWord: false,
+      approxAsWord: translationInfo[closestWordIndex].targetLangWord
+    }
+  }
+  return {
+    paragraph: "No Translation of \""+wordName+"\" found. :(",
+    short: "...",
+    isExactWord: true,
+    approxAsWord: undefined
+  };  
 }
 function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
   let index;
@@ -163,13 +247,19 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
     translationWindowHTML = await LoadTranslationWindowHTML();
   }  
   //Write data into the translation window
-  let [translationParagraph, translationShort] = GetTranslation(targetWord);
+  let translationObject = GetTranslation(targetWord);
+  let translationParagraph = translationObject.paragraph;
+  let translationShort = translationObject.short;
+  let isExectWord = translationObject.isExactWord;
+  let approximationWord = translationObject.approxAsWord;
   //Set the current word infomation into global varaible
   currentlyClickedWord.targetLangWord = targetWord;
   currentlyClickedWord.translationParagraph = translationParagraph;
   currentlyClickedWord.translationShort = translationShort;
   currentlyClickedWord.oldWordStatus = wordStatus;
   currentlyClickedWord.isUsingFreeTranslationList = isUsingFreeTranslationList;
+  currentlyClickedWord.isExactWord = isExectWord;
+  currentlyClickedWord.approximationWord = approximationWord;
   //Create the popup window
   chrome.windows.create({
     url: chrome.runtime.getURL("translationWindow/translationWindow.html"),
