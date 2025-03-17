@@ -10,15 +10,11 @@ body{
 p{
     font-family: "Times New Roman";
 }
-h1{
+h1, h3{
     text-align: center;
     font-family: "Times New Roman";
 }
 h2 {
-    font-family: "Times New Roman";
-}
-h3{
-    text-align: center;
     font-family: "Times New Roman";
 }
 .wordStatus{ 

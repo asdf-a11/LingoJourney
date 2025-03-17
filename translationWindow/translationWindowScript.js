@@ -7,6 +7,8 @@ var isUsingFreeTranslationList = null;
 var isExactWord = null;
 var approximationWord = null;
 
+
+
 function SendMessageToBackground(message, onResponseFunction){
     chrome.runtime.sendMessage(message, function(response) {
         if(onResponseFunction !== undefined){
@@ -54,6 +56,26 @@ function HandleIsNotExactWordMessage(){
         document.getElementById("ApproxAs").textContent = approximationWord;
     }
 }
+function SoundWord(){
+    if("speechSynthesis" in window){
+        speechSynthesis.getVoices().forEach(function(voice) {
+            console.log(voice.name, voice.default ? voice.default :'');
+        });
+        var msg = new SpeechSynthesisUtterance();
+        var voices = window.speechSynthesis.getVoices();
+        console.log("voices: ", voices);
+        msg.voice = voices[0]; 
+        msg.volume = 1; // From 0 to 1
+        msg.rate = 1; // From 0.1 to 10
+        msg.pitch = 2; // From 0 to 2
+        msg.text = targetLangWord;
+        msg.lang = "ru";
+        speechSynthesis.speak(msg);
+    }
+    else{
+        document.getElementById("noSpeechSynth").hidden = false;
+    }
+}
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "CloseTranslationWindow") {
         window.close();
@@ -80,6 +102,7 @@ window.onload = function(){
         ShowMessageIfFreeTranslationList();
         DisplayTranslationsAndTitle();
         HandleIsNotExactWordMessage();
+        SoundWord();
     });
 }
 window.onbeforeunload = function(){
