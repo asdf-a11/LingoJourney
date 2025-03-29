@@ -58,12 +58,8 @@ function HandleIsNotExactWordMessage(){
 }
 function SoundWord(){
     if("speechSynthesis" in window){
-        speechSynthesis.getVoices().forEach(function(voice) {
-            console.log(voice.name, voice.default ? voice.default :'');
-        });
         var msg = new SpeechSynthesisUtterance();
         var voices = window.speechSynthesis.getVoices();
-        console.log("voices: ", voices);
         msg.voice = voices[0]; 
         msg.volume = 1; // From 0 to 1
         msg.rate = 1; // From 0.1 to 10

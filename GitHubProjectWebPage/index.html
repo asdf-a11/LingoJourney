@@ -4,43 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lingo Journey</title>
-    <style>
-        html {
-            font-size: 18px;
-        }
-        @media (max-width: 768px) {
-            html {
-                font-size: 13px;
-            }
-        }
-        body {
-            margin: 0;
-            font-family: "Times New Roman", Times, serif;
-            background-color: rgb(233, 223, 223); 
-        }
-        .banner {
-            background-color: rgb(27,153,139); 
-            color: whitesmoke; 
-            text-align: center;
-            padding: 20px;
-            font-style: underline;
-        }
-        .content {
-            padding: 20px;
-            color: black;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
     <div class="banner">
-        <h1>Lingo Journey</h1>        
+        <h1>Lingo Journey</h1>       
+
     </div>
-    <div class="content">
-        <h2>Welcome to the Lingo Journey website!</h2>
-        <p>
-            Here you can find information about the Lingo Journey project.
-            <br>This website is incomplete right now, be shore to come back later when it is complete.
-        </p>
+    <div class="SectionButtons">
+        <button id="WhatProblemIsBeingSolved_button" class="SectionButton banner">
+            What problem does Lingo Journey solve
+        </button> 
+        <button id="HowIsTheProblemSolved_button" class="SectionButton banner">
+            How is the problem solved
+        </button> 
+        <button id="SpecificFetures_button" class="SectionButton banner">
+            Specific fetures
+        </button> 
     </div>
+    <article>
+        <div id="WhatProblemIsBeingSolved">
+            <hr>
+                <h2>What problem is Lingo Journey solving</h2>
+            <hr>
+            <p>
+                <ul>
+                    <li>
+                        <b>Difficult to listen to content.</b> With other apps it can be difficult to use sites like YouTube to listen to content. It can be time consuming to import
+                        the YouTube video into your chosen app and even if you do their support for getting translations at the speed at which you need them whilst whatching the video can be poor. 
+                        This can put many people off listening and that will untamatly hurt their langauge learning goals in the long term.
+                    </li>
+                    <li>
+                        <b>Difficulty intergrating language learning into daily habbits.</b> Most apps used to help people learn languages require one to import content into the app. This takes 
+                        time and can begin to feel like a chore. Wouldn't it be great if there was a tool that worked directly in the browser, no importing content? One could surf the web and engage
+                        in a much wider range of contet.
+                    </li>
+                </ul>
+            </p>
+        </div>
+        <div id="HowIsTheProblemSolved">
+            <hr>
+                <h2>How does Lingo Journey solve the problem</h2>
+            <hr>
+            <p>
+                Being a chrome extension means it is right there in the browser, where the majority of content people are engaging with is going to be. Being able to get a translation for a 
+                word will only ever be 3 or so clicks away.
+                <br>
+                <image src="assets/ClickToGetTranslation1.PNG" width="600" height="500">
+                <image src="assets/ClickToGetTranslation2.PNG" width="600" height="500">
+                <br>
+                <br><br>
+                Lingo Journey makes watching YouTube realy easy and realy productive. In just a press of a button you will then be able to click on the subtitle and get translations.
+            </p>
+        </div>
+        <div id="SpecificFetures">
+            <hr>
+                <h2>What are all the fetures Lingo Journey offers</h2>
+            <hr>
+            <p>
+                <h3>Visual depiction of progress</h3>
+                Words which have never been seen before, words which have been seen but are not known and known words are all highligted different colours. This is very important because
+                it gives a very visual dipiction of how much progress one has made in the language. 
+            </p>
+        </div>
+
+    </article>
 </body>
 </html>

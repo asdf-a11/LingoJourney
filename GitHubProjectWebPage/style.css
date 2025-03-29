@@ -1,0 +1,47 @@
+:root{
+    --BannerColour: rgb(27,153,139);
+    --BannerTextColour: whitesmoke;
+}
+* {
+    font-family: "Times New Roman", Times, serif;
+}
+html {
+    font-size: 18px;
+    text-align: center;
+}
+@media (max-width: 768px) {
+    html {
+        font-size: 13px;
+        text-align: center;
+    }
+}
+body {
+    margin: 0;            
+    background-color: rgb(233, 223, 223); 
+}
+.banner {
+    background-color: var(--BannerColour); 
+    color: var(--BannerTextColour); 
+    text-align: center;
+    padding: 20px;
+}
+.banner *{
+    text-decoration: underline;
+}
+article {
+    padding: 20px;
+    color: black;
+}
+.SectionButtons{
+    text-align: left;
+}
+.SectionButton{
+    text-align: left;
+    background-color: var(--BannerColour);
+    padding: 10px;    
+    color: var(--BannerTextColour);
+}
+ul{
+    list-style-type: upper-roman;
+    list-style-position: inside;
+}
