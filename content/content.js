@@ -42,12 +42,26 @@ function AddIfNotAllreadyIn(arr, item){
   }
   return arr;
 }
+//Removes all the accents from a string
+function RemoveAllAccents(string){
+  let decomposedString = string.normalize("NFD");
+  let allowedCharacters = [
+    "й"
+  ];
+  for(const c of allowedCharacters){
+    decomposedString = decomposedString.replace(c.normalize("NFD"), c.normalize("NFC"));
+  }
+  decomposedString = decomposedString.replace(/[\u0300-\u036f]/g, "");
+  return decomposedString;
+}
 //Puts spaces either side of each character
 //stops words contain punctuation
 function ReplaceWithSpace(content){
   const repList = [
     "-",".",",","?","!", "[","]","&","#","@", "-", "_", "(", ")", "\"", "\'", ":", ";",
-    "«", "»", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+    "«", "»", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
+    "\n", "\t",
+    "\u00A0" // non-breaking space
   ];
   for(let i = 0; i < repList.length; i++){
     content = content.replaceAll(repList[i]," "+repList[i]+" ");
@@ -249,9 +263,15 @@ function Wordify(argument){
   for(let elementCounter in textElements){
     let currentElement = textElements[elementCounter];
     let currentElementStyle = window.getComputedStyle(currentElement);
+    //Get text content of current element and not child elements
     let text = GetDirectTextContent(currentElement).toLowerCase();
+    //All gramatical characters have spaces put round them
     text = ReplaceWithSpace(text);
-    const wordList = text.split(/[\u0020\u00A0\u000A\u0009]+/);
+    //Removes all the accents from the text
+    text = RemoveAllAccents(text);
+    //
+    const wordList = text.split(" ");
+    //
     RemoveTextNodes(currentElement);
     for(let i = 0; i < wordList.length; i++){
       if(wordList[i].length == 0){ continue; }
