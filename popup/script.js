@@ -82,6 +82,7 @@ function OnExitSettingsClicked(){
     else{
         document.getElementById("SelectTranslationFile").hidden = false;  
     }
+    document.getElementById("SettingsButtonDiv").hidden = false;
 }
 function OnDowloadKnownWords(){
     SendMessageToBackground({
