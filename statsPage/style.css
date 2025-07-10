@@ -1,0 +1,17 @@
+
+*{
+    font-family: 'Times New Roman', Times, serif;
+}
+header {
+    padding: 10px; /* some padding */
+    text-align: center; /* center the text */
+    background: #1B998B; /* green background */
+    color: whitesmoke;
+}
+header h1{
+    text-align: center;
+    text-decoration: underline;
+}
+body{
+    background-color: whitesmoke;
+}

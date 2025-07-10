@@ -14,7 +14,7 @@ button{
     padding: 11px 11px;
     cursor: pointer;     
     font-family: "Times New Roman", Times, serif;   
-    display:block;    
+    display:block;  
 }
 button:hover{
     background-color: #636663;        
@@ -43,4 +43,11 @@ button:hover + .optionInfo{
     display: block;
     color: red;
     font-family: "Times New Roman";
+}
+footer {
+    display: flex;
+    justify-content: space-between; /* Push items to edges */
+    align-items: center;            /* Vertically center if needed */
+    padding: 5px;                  /* Optional spacing */
+    background-color: darkslategray;
 }

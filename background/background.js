@@ -70,6 +70,7 @@ async function LoadTranslationWindowHTML(){
 }
 async function LoadTranslations(fileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
+  console.log("Loading translation of file ", fileName)
   isUsingFreeTranslationList = false;
   for(let i of INCOMPLETE_TRANSLATION_LIST_FILE_NAMES){
     if(fileName == i){
@@ -171,6 +172,9 @@ function GetClosestString(searchString, stringList, threshold){
   return undefined;
 }
 function GetTranslation(wordName){
+  if(translationInfo == null){
+    console.error("Translation info is not set");
+  }
   for(let i = 0; i < translationInfo.length; i++){
     if(translationInfo[i].targetLangWord === wordName){
       return {
@@ -286,6 +290,11 @@ function SetContentScriptTabId(){
     }
   });
 }
+function OpenStatsPage(){
+  const statsPageUrl = chrome.runtime.getURL("statsPage/statsPage.html");
+  //window.open(statsPageUrl, "");
+  chrome.tabs.create({ url: statsPageUrl });
+}
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){
       case "LoadTranslationData":
@@ -322,6 +331,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         break;
       case "GetKnownWordList":
         sendResponse({knownWordList: knownWordList});
+        break;
+      case "OpenStatsPage":
+        OpenStatsPage();
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":

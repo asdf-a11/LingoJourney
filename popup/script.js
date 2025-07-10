@@ -120,6 +120,9 @@ function OnWordifyWholePage(){
 function OnWordifyYoutube(){
     SendMessageToBackground({type: "StartYoutubeRoutine"});
 }
+function OnStatButtonPress(){
+    SendMessageToBackground({type: "OpenStatsPage"});
+}
 window.onload = function(){
     LoadPrevoiseFileNames();
     document.getElementById("pickedFileName_button").onclick = OnSelectedTranslationFile;
@@ -128,4 +131,5 @@ window.onload = function(){
     document.getElementById("SettingsButton").onclick = OnSettingsButtonClicked;
     document.getElementById("ExitSettingsButton").onclick = OnExitSettingsClicked;
     document.getElementById("DowloadKnownWordsButton").onclick = OnDowloadKnownWords;
+    document.getElementById("StatsButton").onclick = OnStatButtonPress;
 }
