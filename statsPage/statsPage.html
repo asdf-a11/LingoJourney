@@ -3,11 +3,23 @@
     <head>
         <title>Lingo Journy stats page</title>
         <link rel="stylesheet" href="style.css">
+        <script src="statsScript.js"></script>
     </head>
     <body>
         <header>
             <h1>Lingo Journey</h1>
         </header>
-
+        <main>
+            <div class="graphs" id="graphContainer">
+                <h3>Known words</h3>
+                <canvas id="knownWordsGraph" width="10px" height="10px"></canvas>
+                <p>Number of known words: <span id="knownWordsNumber"></span></p>
+                <h3>Learning words</h3>
+                <p style="font-style: italic;">Learnign word is a word that you have clicked
+                    on before but have not clasified it as known</p>
+                <canvas id="learningWordsGraph" width=""></canvas>
+                <p>Number of learning words: <span id="learningWordsNumber"></span></p>
+            </div>
+        </main>
     </body>
 </html>

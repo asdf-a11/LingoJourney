@@ -291,9 +291,23 @@ function SetContentScriptTabId(){
   });
 }
 function OpenStatsPage(){
+  //Calculate stats
+  let numberOfKnownWords = knownWordList.length;
+  let numberOfLearningWords = learningWordList.length;
+  //Open stats page and send stat infomation
   const statsPageUrl = chrome.runtime.getURL("statsPage/statsPage.html");
-  //window.open(statsPageUrl, "");
-  chrome.tabs.create({ url: statsPageUrl });
+  chrome.tabs.create({ url: statsPageUrl }, (tab) => {
+    chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+      if (tabId === tab.id && info.status === "complete") {
+        chrome.tabs.onUpdated.removeListener(listener);
+        let msgToStatsPage = {
+          numberOfKnownWords: numberOfKnownWords,
+          numberOfLearningWords: numberOfLearningWords
+        };
+        chrome.tabs.sendMessage(tab.id, msgToStatsPage);
+      }
+    });
+  });
 }
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){

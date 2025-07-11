@@ -1,0 +1,48 @@
+let numberOfKnownWords = undefined;
+let numberOfLearningWords = undefined;
+
+function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
+  const canvas = document.getElementById(canvasIdName);
+  const perantElement = document.getElementById("graphContainer");
+  canvas.width = perantElement.offsetWidth * 0.95;
+  canvas.height = perantElement.offsetHeight * 0.08;
+  const width = canvas.getBoundingClientRect().width;
+  const height = canvas.getBoundingClientRect().height;
+  console.log(width, height);
+  let ctx = canvas.getContext("2d");
+  const valueToPixel = width / (maxValue - minValue);
+  //Draw graphs background
+  ctx.fillStyle = "rgb(129,133,137)";
+  ctx.fillRect(0,0, width,height);
+  //Draw bar
+  ctx.fillStyle = "rgb(255,102,0)";
+  ctx.fillRect(0,0, valueToPixel * (value-minValue),height);
+  //Draw checkpoints
+  for(let v of checkPointList){
+    ctx.moveTo(valueToPixel * v, 0);
+    ctx.lineTo(valueToPixel * v, height);
+    ctx.stroke();
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px Times New Roman";
+    ctx.fillText(v.toString(), valueToPixel * v ,height - 20);
+  }
+}
+function UpdateAllGraphs(){
+  console.log("known, learning words->",numberOfKnownWords, numberOfLearningWords);
+  DrawGraph("knownWordsGraph", numberOfKnownWords, 0, 20000, [100,500,1000,2000,3000]);
+  DrawGraph("learningWordsGraph", numberOfLearningWords, 0, 20000, [100,500,1000,2000,3000]);
+  document.getElementById("learningWordsNumber").textContent = numberOfLearningWords.toString();
+  document.getElementById("knownWordsNumber").textContent = numberOfKnownWords.toString();
+}
+
+window.onload = function(){
+
+}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  numberOfKnownWords = message.numberOfKnownWords;
+  numberOfLearningWords = message.numberOfLearningWords;
+  UpdateAllGraphs();
+});
+
+
+

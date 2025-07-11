@@ -6,12 +6,58 @@ header {
     padding: 10px; /* some padding */
     text-align: center; /* center the text */
     background: #1B998B; /* green background */
-    color: whitesmoke;
+    color: #f5f5f5;
 }
 header h1{
     text-align: center;
     text-decoration: underline;
 }
 body{
-    background-color: whitesmoke;
+    background-color: #A09B88;/*rgb(160, 159, 157)*/;
+    margin: 0px;
+    padding: 0px;
 }
+main{
+    margin: 50px;
+    
+}
+.graphs{
+    padding: 7px;
+    width: 100%;
+    height: 100vh;
+    background-color: #f5f5f5;/* rgb(214,211,208);*/
+    /*
+    border-radius: 12px;
+    background: linear-gradient(145deg, #1a1a1a, #333); 
+    box-shadow: 
+        5px 5px 15px #0a0a0a,  
+        -5px -5px 15px #1f1f1f; 
+        */
+    /*color: rgb(214, 211, 208);*/
+    /*box-shadow: 0 0 7px 5px rgba(0,0,0,.35);*/
+    box-shadow: 0px 0px 10px 7px rgba(0, 0, 0, 0.5); /* Outer shadow only */
+    /*border: 2px solid #333;*/
+}
+.graphs h3{
+    text-decoration: underline;
+}
+/*
+.graphs canvas{
+
+    display: block;
+
+}
+*/
+/*
+Colour pallete
+heading colour:
+1B998B
+bit greener:
+64B188
+brown ish:
+A09B88
+tint of blue:
+D7E3E5
+white smoke:
+F5F5F5
+*/
