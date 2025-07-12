@@ -6,6 +6,7 @@ var newWordStatus = null;
 var isUsingFreeTranslationList = null;
 var isExactWord = null;
 var approximationWord = null;
+var wordFreq = null;
 
 
 
@@ -56,6 +57,16 @@ function HandleIsNotExactWordMessage(){
         document.getElementById("ApproxAs").textContent = approximationWord;
     }
 }
+function DisplayWordFreq(){
+    const вFreq = 0.0365258519;
+    const bucketNumber = 100;
+    const minWordPosition = 10000;
+    let estimatedPosition = 1.0/wordFreq * вFreq;
+    const dpNumber = 2;
+    let bucketPosition = Math.round((bucketNumber - Math.max(0.0,estimatedPosition / minWordPosition * bucketNumber)) * Math.pow(10, dpNumber)) /  Math.pow(10, dpNumber);
+
+    document.getElementById("wordFreq").textContent = bucketPosition.toString();
+}
 function SoundWord(){
     if("speechSynthesis" in window){
         var msg = new SpeechSynthesisUtterance();
@@ -87,6 +98,8 @@ window.onload = function(){
         translationShort = message.translationShort;
         isExactWord = message.isExactWord;
         approximationWord = message.approximationWord;
+        wordFreq = message.freq;
+        console.log(message);
         //Unknown words auto set to learning
         newWordStatus = oldWordStatus;
         if(newWordStatus == "unknown"){
@@ -97,6 +110,7 @@ window.onload = function(){
         SetButtonColour();
         ShowMessageIfFreeTranslationList();
         DisplayTranslationsAndTitle();
+        DisplayWordFreq();
         HandleIsNotExactWordMessage();
         SoundWord();
     });

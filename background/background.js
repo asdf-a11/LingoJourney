@@ -36,7 +36,8 @@ var currentlyClickedWord = {
   translationParagraph: "",
   translationShort: "",
   isExactWord: true,
-  approximationWord: undefined
+  approximationWord: undefined,
+  freq: 0.0
 };
 //Stores the tab id of the last content script tab
 //Done because not active when translation window is sending to background script so need to store id
@@ -181,7 +182,8 @@ function GetTranslation(wordName){
         paragraph: translationInfo[i].description,
         short: translationInfo[i].transWords,
         isExactWord: true,
-        approxAsWord: undefined
+        approxAsWord: undefined,
+        freq: translationInfo[i].freqAdj
       };
     }
   }
@@ -191,14 +193,16 @@ function GetTranslation(wordName){
       paragraph: translationInfo[closestWordIndex].description,
       short: translationInfo[closestWordIndex].transWords,
       isExactWord: false,
-      approxAsWord: translationInfo[closestWordIndex].targetLangWord
+      approxAsWord: translationInfo[closestWordIndex].targetLangWord,
+      freq: translationInfo[closestWordIndex].freqAdj
     }
   }
   return {
     paragraph: "No Translation of \""+wordName+"\" found. :(",
     short: "...",
     isExactWord: true,
-    approxAsWord: undefined
+    approxAsWord: undefined,
+    freq: undefined
   };  
 }
 function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
@@ -253,6 +257,7 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
   let translationShort = translationObject.short;
   let isExectWord = translationObject.isExactWord;
   let approximationWord = translationObject.approxAsWord;
+  let targetWordFreq = translationObject.freq;
   //Set the current word infomation into global varaible
   currentlyClickedWord.targetLangWord = targetWord;
   currentlyClickedWord.translationParagraph = translationParagraph;
@@ -261,6 +266,7 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
   currentlyClickedWord.isUsingFreeTranslationList = isUsingFreeTranslationList;
   currentlyClickedWord.isExactWord = isExectWord;
   currentlyClickedWord.approximationWord = approximationWord;
+  currentlyClickedWord.freq = targetWordFreq;
   //Create the popup window
   chrome.windows.create({
     url: chrome.runtime.getURL("translationWindow/translationWindow.html"),
