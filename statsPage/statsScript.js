@@ -6,9 +6,12 @@ function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
   const perantElement = document.getElementById("graphContainer");
   canvas.width = perantElement.offsetWidth * 0.95;
   canvas.height = perantElement.offsetHeight * 0.08;
-  const width = canvas.getBoundingClientRect().width;
+  let width = canvas.getBoundingClientRect().width;
   const height = canvas.getBoundingClientRect().height;
-  console.log(width, height);
+  //Overrides width to make sure graph is not to compact
+  //Might lose higher values
+  width = Math.max(4096/2,width);
+  //console.log(width, height);
   let ctx = canvas.getContext("2d");
   const valueToPixel = width / (maxValue - minValue);
   //Draw graphs background
@@ -29,8 +32,8 @@ function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
 }
 function UpdateAllGraphs(){
   console.log("known, learning words->",numberOfKnownWords, numberOfLearningWords);
-  DrawGraph("knownWordsGraph", numberOfKnownWords, 0, 20000, [100,500,1000,2000,3000]);
-  DrawGraph("learningWordsGraph", numberOfLearningWords, 0, 20000, [100,500,1000,2000,3000]);
+  DrawGraph("knownWordsGraph", numberOfKnownWords, 0, 10000, [100,500,1000,2000,3000,4000]);
+  DrawGraph("learningWordsGraph", numberOfLearningWords, 0, 20000, [500,1000,2000,4000,6000]);
   document.getElementById("learningWordsNumber").textContent = numberOfLearningWords.toString();
   document.getElementById("knownWordsNumber").textContent = numberOfKnownWords.toString();
 }
@@ -43,6 +46,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   numberOfLearningWords = message.numberOfLearningWords;
   UpdateAllGraphs();
 });
-
+//If the window is resized then redraw the graphs
+window.addEventListener('resize', function() {
+  UpdateAllGraphs();
+});
 
 

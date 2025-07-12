@@ -58,9 +58,12 @@ function HandleIsNotExactWordMessage(){
     }
 }
 function DisplayWordFreq(){
+    //Frequcncy of the most common word as it is the coefficenct for zipfs law.
     const вFreq = 0.0365258519;
     const bucketNumber = 100;
+    //The bucket position of a word with estimated position of minWordPosition is 0
     const minWordPosition = 10000;
+    //Using Zipfs law to estimate the position using the frequcny of the word
     let estimatedPosition = 1.0/wordFreq * вFreq;
     const dpNumber = 2;
     let bucketPosition = Math.round((bucketNumber - Math.max(0.0,estimatedPosition / minWordPosition * bucketNumber)) * Math.pow(10, dpNumber)) /  Math.pow(10, dpNumber);
