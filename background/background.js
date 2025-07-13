@@ -18,7 +18,7 @@ var translationWindowSizeX = TRANSLATION_WINDOW_DEFAULT_DIMS[0];
 var translationWindowSizeY = TRANSLATION_WINDOW_DEFAULT_DIMS[1];
 //List of the names of all free translation list files
 const INCOMPLETE_TRANSLATION_LIST_FILE_NAMES = [
-  "EnglishRussianTranslations_Incomplete.json"
+  "RUtoEN_free.txt"
 ];
 //The max number of elements sent in a single transfer
 const WORD_SENDING_BLOCK_SIZE = 5000;
@@ -87,6 +87,7 @@ function DecodeTranslationFile(string){
     "\"freqAdj\": ",
     //"\"embedding\": ",
     " The Russian word ",
+    "In full translation list",
     "English", //"Russian",
     //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
     //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
@@ -94,7 +95,6 @@ function DecodeTranslationFile(string){
   ];
   for(let tokenIndex = 0; tokenIndex < tokenList.length; tokenIndex++){
     let tokenNumber = tokenIndex + tokenOffset;
-    console.log("s",escapeChar+String.fromCharCode(tokenNumber), " r", tokenList[tokenIndex]);
     string = string.split(escapeChar+String.fromCharCode(tokenNumber)).join(tokenList[tokenIndex]);
   }
   return string;

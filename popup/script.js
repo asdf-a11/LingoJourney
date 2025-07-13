@@ -1,7 +1,7 @@
 const BASIC_TRANSLATION_FILES = [
-    "EnglishRussianTranslations_Incomplete.json"
+    "RUtoEN_free.txt"
 ];
-const MAX_NUMBER_OF_FILES = 5;
+const MAX_NUMBER_OF_FILES = 3;
 var prevFileNames = undefined;
 var hasLoadedFile = false;
 
