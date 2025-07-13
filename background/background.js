@@ -85,12 +85,12 @@ function DecodeTranslationFile(string){
     "\"transWords\": ",
     "\"description\": ",
     "\"freqAdj\": ",
-    "\"embedding\": ",
+    //"\"embedding\": ",
     " The Russian word ",
-    "Russian", "English",
-    " when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
-    " is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
-    ", -0.0", ", 0.0"
+    "English", //"Russian",
+    //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
+    //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
+    //", -0.0", ", 0.0"
   ];
   for(let tokenIndex = 0; tokenIndex < tokenList.length; tokenIndex++){
     let tokenNumber = tokenIndex + tokenOffset;
@@ -116,7 +116,6 @@ async function LoadTranslations(fileName, sendResponse){
   }  
   if(response !== undefined){
     let encodedString = await response.text();
-    console.log("here");
     let jsonString = DecodeTranslationFile(encodedString);
     translationInfo = JSON.parse(jsonString);
     //Compiles a list of names of the target lang words
