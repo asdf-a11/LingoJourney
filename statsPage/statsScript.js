@@ -1,5 +1,6 @@
 let numberOfKnownWords = undefined;
 let numberOfLearningWords = undefined;
+let percentageKnownWords = undefined;
 
 function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
   const canvas = document.getElementById(canvasIdName);
@@ -29,18 +30,20 @@ function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
 }
 function UpdateAllGraphs(){
   console.log("known, learning words->",numberOfKnownWords, numberOfLearningWords);
-  DrawGraph("knownWordsGraph", numberOfKnownWords, 0, 20000, [100,500,1000,2000,3000]);
-  DrawGraph("learningWordsGraph", numberOfLearningWords, 0, 20000, [100,500,1000,2000,3000]);
+  DrawGraph("knownWordsGraph", numberOfKnownWords, 0, 10000, [100,500,1000,2000,3000,4000]);
+  DrawGraph("learningWordsGraph", numberOfLearningWords, 0, 20000, [500,1000,2000,4000,6000]);
+}
+function WriteStatsToPage(){
   document.getElementById("learningWordsNumber").textContent = numberOfLearningWords.toString();
   document.getElementById("knownWordsNumber").textContent = numberOfKnownWords.toString();
+  document.getElementById("percentageKnownWords").textContent = (percentageKnownWords*100).toString();
 }
 
-window.onload = function(){
-
-}
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   numberOfKnownWords = message.numberOfKnownWords;
   numberOfLearningWords = message.numberOfLearningWords;
+  percentageKnownWords = message.percentageKnownWords;
+  WriteStatsToPage();
   UpdateAllGraphs();
 });
 

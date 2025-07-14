@@ -100,8 +100,8 @@ function RemoveTextNodes(element) {
 //replaced with buttons for translations
 function GetElementsToEdit(argument){
   let textElements = [];
-  if(argument == "whole"){
-    const textTagNames = ["p", "div", "span", "li"];
+  const textTagNames = ["p", "div", "span", "li"];
+  if(argument == "whole"){    
     for(let i in textTagNames){
       textElements = textElements.concat(HTMLCollectionToJSArray(document.getElementsByTagName(textTagNames[i])));
     }
@@ -109,7 +109,32 @@ function GetElementsToEdit(argument){
   if(argument == "youtube"){
     const youtubeCaptionClassName = "ytp-caption-segment";
     textElements = HTMLCollectionToJSArray(document.getElementsByClassName(youtubeCaptionClassName));
-  }
+    /*
+    Need a way to return wordifed text back to normal text when out of sight otherwise it woun't update colours when it comes back into view
+    */
+    /*
+    for(let i in textTagNames){
+      let arr = HTMLCollectionToJSArray(document.getElementsByTagName(textTagNames[i]));
+      //Remove elements that are out of sight
+      const testingBounds = 100;
+      const screenX = window.innerWidth;
+      const screenY = window.innerHeight;
+      for(let j = arr.length-1; j > 0; j--){
+        //rect.top, rect.right, rect.bottom, rect.left
+        let rect = arr[j].getBoundingClientRect();
+        let offScreen = rect.left + rect.width < testingBounds;
+        offScreen ||= rect.left > testingBounds + screenX;
+        offScreen ||= rect.top > testingBounds + screenY;
+        offScreen ||= rect.top < testingBounds;
+        if(offScreen){
+          arr.splice(j,1);
+        } 
+      }
+      //
+      textElements = textElements.concat(arr);
+    }
+    */    
+  }  
   return textElements;
 }
 //Takes the most important style settings and

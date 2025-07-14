@@ -291,10 +291,27 @@ function SetContentScriptTabId(){
     }
   });
 }
+function CalculatePercentageKnownWords(){
+  let totalFreq = 0;
+  for(let word of knownWordList){
+    let translationObject = GetTranslation(word);
+    let freq = Number(translationObject.freq);
+    if(freq !== undefined){
+      totalFreq += freq; 
+    }       
+  }
+  //Assume there is 50000 words in the language
+  const maxNumberOfWords = 60000;
+  const initialWordFreq = 0.0365258519;
+  //Intergrate of zipf law
+  const totalFreqOfAllWords = initialWordFreq * Math.log(maxNumberOfWords);
+  return totalFreq / totalFreqOfAllWords;
+}
 function OpenStatsPage(){
   //Calculate stats
   let numberOfKnownWords = knownWordList.length;
   let numberOfLearningWords = learningWordList.length;
+  let percentageKnownWords = CalculatePercentageKnownWords();
   //Open stats page and send stat infomation
   const statsPageUrl = chrome.runtime.getURL("statsPage/statsPage.html");
   chrome.tabs.create({ url: statsPageUrl }, (tab) => {
@@ -303,7 +320,8 @@ function OpenStatsPage(){
         chrome.tabs.onUpdated.removeListener(listener);
         let msgToStatsPage = {
           numberOfKnownWords: numberOfKnownWords,
-          numberOfLearningWords: numberOfLearningWords
+          numberOfLearningWords: numberOfLearningWords,
+          percentageKnownWords: percentageKnownWords
         };
         chrome.tabs.sendMessage(tab.id, msgToStatsPage);
       }
