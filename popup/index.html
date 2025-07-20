@@ -4,14 +4,14 @@
         <title>Lingo Journey</title>
         <meta charset="utf-8">
         <link rel="stylesheet" href="popupStyle.css">
-        <script src="script.js"></script>
+        
     </head>
     <body>
         <div class="header">
             <h1>Lingo Journey</h1>
         </div>
-        <div id="SelectTranslationFile">
-            <p id="LoadSucc" class="errorText" hidden>The file you enterd does not exist or could not be loaded. Please try again.</p>
+        <div hidden id="SelectLanguage">
+            <!--<p id="LoadSucc" class="errorText" hidden>The file you enterd does not exist or could not be loaded. Please try again.</p>
             <p>Enter Translation File Name: (relative to LanguageData folder within the extension)</p>
             <input list="fileNameList" id="fileName_input" name="fileName_input" size="30">
             <datalist id="fileNameList">
@@ -21,7 +21,12 @@
                 <button type="button" id="pickedFileName_button">
                     Click to continue
                 </button>
-            </div>       
+            </div>      
+            -->
+            <p>Pick a language:</p>
+            <div id="languageListDiv">
+                
+            </div>
         </div>
         <div hidden id="OperationsMenu">
             <button id="WordifyWholePage_button">Wordify Whole Page</button>
@@ -36,6 +41,7 @@
         <footer>
             <div id="SettingsButtonDiv"><button id="SettingsButton">Settings</button></div>
             <button id="StatsButton">Stats</button>
-        </footer>        
+        </footer>      
+        <script src="script.js" type="module"></script>  
     </body>
 </html>

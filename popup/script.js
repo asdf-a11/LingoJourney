@@ -1,15 +1,15 @@
-const BASIC_TRANSLATION_FILES = [
-    "RUtoEN_free.txt"
-];
+//imgPath is relative to assets/Flags and
+//translation paths a relitive to LanguageData
+
+
+//const BASIC_TRANSLATION_FILES = [
+//    "RUtoEN_free.txt"
+//];
 const MAX_NUMBER_OF_FILES = 3;
 var prevFileNames = undefined;
 var hasLoadedFile = false;
 
-const MENU_ID_LIST = [
-    "SelectTranslationFile",
-    "OperationsMenu",
-    "SettingsMenu"
-];
+import * as menuModual from "./menus.js"
 
 function SendMessageToBackground(message, func) {
     function ResponseFunction(response) {
@@ -57,19 +57,17 @@ function LoadPrevoiseFileNames(){
         } 
     });
 }    
-function HideAllMenues(){
-    for(let i of MENU_ID_LIST){
-        document.getElementById(i).hidden = true;
+
+function ChangeMenu(newMenu){
+    HideAllMenues();
+    //backtrack menues
+    if(newMenu === menuEnum.PrevMenu){
+        currentMenu = prevMenu;
+
+        return;
     }
 }
-function VeiwOperationMenu(){
-    HideAllMenues();
-    document.getElementById("OperationsMenu").hidden = false;
-}
-function VeiwSelectTranslationFile(){
-    HideAllMenues();
-    document.getElementById("SelectTranslationFile").hidden = false;    
-}
+
 function OnSettingsButtonClicked(){
     HideAllMenues();
     document.getElementById("SettingsMenu").hidden = false;
@@ -124,13 +122,17 @@ function OnWordifyYoutube(){
 function OnStatButtonPress(){
     SendMessageToBackground({type: "OpenStatsPage"});
 }
-window.onload = function(){
-    LoadPrevoiseFileNames();
-    document.getElementById("pickedFileName_button").onclick = OnSelectedTranslationFile;
+//window.onload = function(){}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOing something");
+    menuModual.ChangeMenu(menuModual.menuList.SelectLanguage.id);
+    //LoadPrevoiseFileNames();
+    //document.getElementById("pickedFileName_button").onclick = OnSelectedTranslationFile;
     document.getElementById("WordifyWholePage_button").onclick = OnWordifyWholePage;
     document.getElementById("WordifyYoutube_button").onclick = OnWordifyYoutube;
     document.getElementById("SettingsButton").onclick = OnSettingsButtonClicked;
     document.getElementById("ExitSettingsButton").onclick = OnExitSettingsClicked;
     document.getElementById("DowloadKnownWordsButton").onclick = OnDowloadKnownWords;
     document.getElementById("StatsButton").onclick = OnStatButtonPress;
-}
+});

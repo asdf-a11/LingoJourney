@@ -55,3 +55,14 @@ footer {
 #fileName_input{
     width: 90%;
 }
+
+.languageImage {
+    /*Make sure image is scaled using linear interpilation*/
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    width: 3em;
+    height: 3em;
+    border-style: solid;
+    margin: 5px;
+}
