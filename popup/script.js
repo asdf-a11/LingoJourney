@@ -40,6 +40,7 @@ function LoadPrevoiseFileNames(){
         prevFileNames: []
     }, function(result) {        
         prevFileNames = result.prevFileNames;
+        console.log("Setting prevoise file names, ", )
         let e = document.getElementById("fileNameList");
         prevFileNames.length = Math.min(prevFileNames.length,MAX_NUMBER_OF_FILES);
         for(let i = 0; i < prevFileNames.length; i++){

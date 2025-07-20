@@ -203,6 +203,7 @@ function GetTranslation(wordName){
 }
 function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
   let index;
+  console.log("Updating word status ", newStatus, "from ", prevStatus, " word ", targetWord);
   switch(newStatus){
     case "known":
       index = knownWordList.indexOf(targetWord);

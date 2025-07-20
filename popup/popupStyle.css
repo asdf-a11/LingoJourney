@@ -51,3 +51,7 @@ footer {
     padding: 5px;                  /* Optional spacing */
     background-color: darkslategray;
 }
+
+#fileName_input{
+    width: 90%;
+}
