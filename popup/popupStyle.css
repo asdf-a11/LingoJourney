@@ -51,11 +51,9 @@ footer {
     padding: 5px;                  /* Optional spacing */
     background-color: darkslategray;
 }
-
 #fileName_input{
     width: 90%;
 }
-
 .languageImage {
     /*Make sure image is scaled using linear interpilation*/
     image-rendering: pixelated;
