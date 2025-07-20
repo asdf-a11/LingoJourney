@@ -22,8 +22,11 @@ var translationWindowSizeY = 800;
 var translationInfo = undefined;
 //Stores a string for the html of the popup translation window
 var translationWindowHTML = undefined;
-//A list of all buttons on the webpage
+//List of all word buttons, may contain buttons that have been deleted
+//these buttons are removed if the id is not found when the updateColour function is called
 var buttonIdList = [];
+//Counter to make sure buttons have unique id (resets at 1000000)
+let buttonIdCounter = 0;
 
 //Remove one item from the array
 function RemoveItemFromArray(arr, item){  
@@ -211,14 +214,16 @@ function SetWordStatus(word, wordStatus){
 }
 //After a word has changed status needs to go over all words and update them
 //because their word colour might need to change
-function UpdateAllButtonColours(targetWord, typeName, buttonIdList){
+function UpdateAllButtonColours(targetWord, typeName, buttonIdList){  
   let newColour = GetWordColour(typeName);
-  for(let i = 0; i < buttonIdList.length; i++){
+  for(let i = 0; i < buttonIdList.length; i++){   
     let e = document.getElementById(buttonIdList[i]);
+    //Chance button could have been deleted after wordify therefore step over to stop crash
+    if(e === null){ continue; }    
     let splitList = buttonIdList[i].split("-");
     let buttonsTargetWord = splitList[1];
     if(targetWord == buttonsTargetWord){
-      e.style.backgroundColor = newColour;
+      e.style.backgroundColor = newColour;      
     }
   }
 }
@@ -257,16 +262,18 @@ function CloseTranslationWindowRoutine(popupWindow, buttonIdList){
 function AssignFunctionToButtons(buttonIdList){
   buttonIdList.forEach(id => {
     const button = document.getElementById(id);
-    button.addEventListener('click', function () {
-      let splitList = button.id.split("-");
-      let targetWord = splitList[1];     
-      let wordStatus = splitList[2];   
-      SendMessageToBackground({
-        type: "WordClickEvent",
-        targetWord: targetWord,
-        wordStatus: wordStatus
-      }); 
-    });
+    if(button !== null){//Check button has not been deleted
+      button.addEventListener('click', function () {
+        let splitList = button.id.split("-");
+        let targetWord = splitList[1];     
+        let wordStatus = splitList[2];   
+        SendMessageToBackground({
+          type: "WordClickEvent",
+          targetWord: targetWord,
+          wordStatus: wordStatus
+        }); 
+      });
+    }
   });
 }
 //Sends a object back the background script
@@ -279,12 +286,24 @@ function SendMessageToBackground(message, onResponseFunction){
     }
   });
 }
+//Remove all ids for buttons that no longer exist
+function RemoveDeletedButtons(buttonIdList){
+  for(let i = 0; i < buttonIdList.length;){
+    let e = document.getElementById(buttonIdList[i]);
+    if(e === null){
+      buttonIdList.splice(i,1);
+      continue;
+    }
+    i++;
+  }
+  return buttonIdList;
+}
 //Turns text on the webpage to buttons
 //takes whether to do whole page or just youtube sutitles as a string
 function Wordify(argument){
   const BUTTON_ID_STRING = "buttonIdString";
   textElements = GetElementsToEdit(argument);
-  buttonIdList = [];
+  let newButtons = [];
   for(let elementCounter in textElements){
     let currentElement = textElements[elementCounter];
     let currentElementStyle = window.getComputedStyle(currentElement);
@@ -303,7 +322,7 @@ function Wordify(argument){
       let newButton = document.createElement('button');
       newButton.textContent = wordList[i];      
       let wordType = GetWordType(wordList[i]);
-      let buttonIdString = BUTTON_ID_STRING+"-".concat(newButton.textContent)+"-".concat(wordType)+"-".concat(buttonIdList.length.toString());
+      let buttonIdString = BUTTON_ID_STRING+"-".concat(newButton.textContent)+"-".concat(wordType)+"-".concat(buttonIdCounter.toString());
       newButton.id = buttonIdString; 
       ApplyStyleSettings(newButton, currentElementStyle);        
       newButton.style.backgroundColor = GetWordColour(wordType);
@@ -312,11 +331,18 @@ function Wordify(argument){
       newButton.style.textAlign= "center";
       newButton.style.margin= "0px 0px";
       newButton.style.cursor= "pointer";
-      buttonIdList.push(newButton.id);
+      newButtons.push(newButton.id);
       currentElement.appendChild(newButton);
+      buttonIdCounter++;
+      //Stop id counting to rediculus numbers
+      if(buttonIdCounter > 1000000){buttonIdCounter=0;}
     } 
   }
-  AssignFunctionToButtons(buttonIdList);
+  //Attach click event to all new buttons
+  AssignFunctionToButtons(newButtons);
+  buttonIdList = RemoveDeletedButtons(buttonIdList);
+  //Add new buttons to button list
+  buttonIdList = buttonIdList.concat(newButtons);
 }
 //Updates whole page just once
 function UpdatePage(argument="whole"){
@@ -376,7 +402,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       translationInfo = translationInfo.concat(request.listSection);   
       break;
     case "UpdateWordColours":
-      console.log("Should be updating colours");
+      SetWordStatus(request.targetLangWord, request.newWordStatus);
       UpdateAllButtonColours(request.targetLangWord, request.newWordStatus, buttonIdList);
       break;
     //Wordifies the page

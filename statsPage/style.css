@@ -2,6 +2,12 @@
 *{
     font-family: 'Times New Roman', Times, serif;
 }
+h3{
+    font-size: 2em;
+}
+p{
+    font-size: 1.5em;
+}
 header {
     padding: 10px; /* some padding */
     text-align: center; /* center the text */

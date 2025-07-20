@@ -18,7 +18,7 @@ var translationWindowSizeX = TRANSLATION_WINDOW_DEFAULT_DIMS[0];
 var translationWindowSizeY = TRANSLATION_WINDOW_DEFAULT_DIMS[1];
 //List of the names of all free translation list files
 const INCOMPLETE_TRANSLATION_LIST_FILE_NAMES = [
-  "EnglishRussianTranslations_Incomplete.json"
+  "RUtoEN_free.txt"
 ];
 //The max number of elements sent in a single transfer
 const WORD_SENDING_BLOCK_SIZE = 5000;
@@ -36,7 +36,8 @@ var currentlyClickedWord = {
   translationParagraph: "",
   translationShort: "",
   isExactWord: true,
-  approximationWord: undefined
+  approximationWord: undefined,
+  freq: 0.0
 };
 //Stores the tab id of the last content script tab
 //Done because not active when translation window is sending to background script so need to store id
@@ -68,16 +69,40 @@ async function LoadTranslationWindowHTML(){
   let text = await response.text();
   return text;
 }
+function IsFreeTranslationFileName(fileName){
+  for(let i of INCOMPLETE_TRANSLATION_LIST_FILE_NAMES){
+    if(fileName === i){
+      return true;
+    }
+  }
+  return false;
+}
+function DecodeTranslationFile(string){
+  const escapeChar = "`";
+  const tokenOffset = 32;
+  const tokenList = [
+    "\"targetLangWord\": ",
+    "\"transWords\": ",
+    "\"description\": ",
+    "\"freqAdj\": ",
+    //"\"embedding\": ",
+    " The Russian word ",
+    "In full translation list",
+    "English", //"Russian",
+    //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
+    //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
+    //", -0.0", ", 0.0"
+  ];
+  for(let tokenIndex = 0; tokenIndex < tokenList.length; tokenIndex++){
+    let tokenNumber = tokenIndex + tokenOffset;
+    string = string.split(escapeChar+String.fromCharCode(tokenNumber)).join(tokenList[tokenIndex]);
+  }
+  return string;
+}
 async function LoadTranslations(fileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
   console.log("Loading translation of file ", fileName)
-  isUsingFreeTranslationList = false;
-  for(let i of INCOMPLETE_TRANSLATION_LIST_FILE_NAMES){
-    if(fileName == i){
-      isUsingFreeTranslationList = true;
-      break;
-    }
-  }
+  let isUsingFreeTranslationList = IsFreeTranslationFileName(fileName);
   let filePath = "LanguageData/"+fileName
   let link = chrome.runtime.getURL(filePath);
   let response = undefined;
@@ -90,8 +115,9 @@ async function LoadTranslations(fileName, sendResponse){
     succ = false;
   }  
   if(response !== undefined){
-    let content = await response.text();
-    translationInfo = JSON.parse(content);
+    let encodedString = await response.text();
+    let jsonString = DecodeTranslationFile(encodedString);
+    translationInfo = JSON.parse(jsonString);
     //Compiles a list of names of the target lang words
     translationTargetWordNameList = [];
     for(let i of translationInfo){
@@ -181,7 +207,8 @@ function GetTranslation(wordName){
         paragraph: translationInfo[i].description,
         short: translationInfo[i].transWords,
         isExactWord: true,
-        approxAsWord: undefined
+        approxAsWord: undefined,
+        freq: translationInfo[i].freqAdj
       };
     }
   }
@@ -191,14 +218,16 @@ function GetTranslation(wordName){
       paragraph: translationInfo[closestWordIndex].description,
       short: translationInfo[closestWordIndex].transWords,
       isExactWord: false,
-      approxAsWord: translationInfo[closestWordIndex].targetLangWord
+      approxAsWord: translationInfo[closestWordIndex].targetLangWord,
+      freq: translationInfo[closestWordIndex].freqAdj
     }
   }
   return {
     paragraph: "No Translation of \""+wordName+"\" found. :(",
     short: "...",
     isExactWord: true,
-    approxAsWord: undefined
+    approxAsWord: undefined,
+    freq: undefined
   };  
 }
 function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
@@ -254,6 +283,7 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
   let translationShort = translationObject.short;
   let isExectWord = translationObject.isExactWord;
   let approximationWord = translationObject.approxAsWord;
+  let targetWordFreq = translationObject.freq;
   //Set the current word infomation into global varaible
   currentlyClickedWord.targetLangWord = targetWord;
   currentlyClickedWord.translationParagraph = translationParagraph;
@@ -262,6 +292,7 @@ async function DisplayTranslationWindow(targetWord, wordStatus){
   currentlyClickedWord.isUsingFreeTranslationList = isUsingFreeTranslationList;
   currentlyClickedWord.isExactWord = isExectWord;
   currentlyClickedWord.approximationWord = approximationWord;
+  currentlyClickedWord.freq = targetWordFreq;
   //Create the popup window
   chrome.windows.create({
     url: chrome.runtime.getURL("translationWindow/translationWindow.html"),
