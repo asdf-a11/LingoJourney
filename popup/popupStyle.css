@@ -10,14 +10,21 @@ button{
     font-size: 15px;
     color: white;
     background-color: #8D918D;
-    margin: none;
-    padding: 11px 11px;
+    /*margin: none;
+    padding: 11px 11px;*/
     cursor: pointer;     
     font-family: "Times New Roman", Times, serif;   
     display:block;  
+    align-items: center;
 }
 button:hover{
     background-color: #636663;        
+}
+button > img{
+    display: block;
+    padding: 0px;
+    margin: 0;
+    object-fit: contain;
 }
 .header {
     padding: 10px; /* some padding */
@@ -62,4 +69,5 @@ footer {
     width: 3em;
     height: 3em;
     border-style: solid;
+    border-color: black;
 }
