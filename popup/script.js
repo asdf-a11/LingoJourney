@@ -9,12 +9,38 @@ const MAX_NUMBER_OF_FILES = 3;
 var prevFileNames = undefined;
 var hasLoadedFile = false;
 
+let selectedLanguage = undefined;
+
 const languageList = [
     {name: "russian", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationPath:null}
 ];
 
 function SelectALanguage(languageData){
     console.log("Selected a language ", languageData);
+    selectedLanguage = languageData;   
+    let filePath;
+    if(languageData.paidTranslationPath == null){
+        //Is using free translation file set bool
+        filePath = languageData.freeTranslationPath;
+    }
+    else{
+        filePath = languageData.paidTranslationPath;
+    }
+    //let filePath = (languageData.paidTranslationPath == null) ?
+    //    languageData.freeTranslationPath : languageData.paidTranslationPath;
+    SendMessageToBackground({
+        type: "LoadTranslationData",
+        fileName: filePath
+    }, function(request){
+        //If failed to load then dont hide error message
+        document.getElementById("LoadSucc").hidden = request.status;
+        if(request.status == false){
+            console.error("Somethind went wrong when trying to load translation file");
+        }
+        else{
+            ChangeMenu(menuList.OperationMenu.id);
+        }
+    });     
 }
 function DisplaySelectLanguageMenu(){  
     //Display languages buttons to user to click on and select a language
@@ -106,6 +132,7 @@ function DownloadStringAsFile(filename, content) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 }
+/*
 function LoadPrevoiseFileNames(){
     chrome.storage.sync.get({
         prevFileNames: []
@@ -128,6 +155,7 @@ function LoadPrevoiseFileNames(){
         } 
     });
 }    
+*/
 
 function OnSettingsButtonClicked(){
     HideAllMenues();
@@ -144,6 +172,7 @@ function OnExitSettingsClicked(){
     }
     document.getElementById("SettingsButtonDiv").hidden = false;
 }
+//Dowloads the list of all known words to users dowload folder
 function OnDowloadKnownWords(){
     SendMessageToBackground({
         type: "GetKnownWordList"
@@ -152,6 +181,7 @@ function OnDowloadKnownWords(){
         DownloadStringAsFile("Lingo Journey - known word list.txt", string);
     });
 }
+/*
 function OnSelectedTranslationFile(){
     let fileName = document.getElementById("fileName_input").value;
     if(prevFileNames.indexOf(fileName) == -1){
@@ -174,6 +204,7 @@ function OnSelectedTranslationFile(){
     });    
     hasLoadedFile = true;
 }
+*/
 function OnWordifyWholePage(){
     SendMessageToBackground({type: "StartUpdatePage"});
 }
