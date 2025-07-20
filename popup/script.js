@@ -26,8 +26,7 @@ function SelectALanguage(languageData){
     else{
         filePath = languageData.paidTranslationPath;
     }
-    //let filePath = (languageData.paidTranslationPath == null) ?
-    //    languageData.freeTranslationPath : languageData.paidTranslationPath;
+    console.log("Loading file ", filePath);
     SendMessageToBackground({
         type: "LoadTranslationData",
         fileName: filePath
@@ -60,7 +59,6 @@ function DisplaySelectLanguageMenu(){
         languageListDiv.appendChild(buttonElement);
     }  
 }
-
 const menuList = {
     SelectLanguage: {id:"SelectLanguage",displayFunc:DisplaySelectLanguageMenu},
     OperationMenu: {id:"OperationsMenu",displayFunc:null}, 
