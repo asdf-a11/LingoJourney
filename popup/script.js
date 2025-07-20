@@ -10,6 +10,7 @@ var prevFileNames = undefined;
 var hasLoadedFile = false;
 
 let selectedLanguage = undefined;
+let isFreeTranslationList = undefined;
 
 const languageList = [
     {name: "russian", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationPath:null}
@@ -29,10 +30,14 @@ function SelectALanguage(languageData){
     console.log("Loading file ", filePath);
     SendMessageToBackground({
         type: "LoadTranslationData",
-        fileName: filePath
+        freeTranslationFileName: languageData.freeTranslationPath,
+        paidTranslationPath: languageData.paidTranslationPath
     }, function(request){
         //If failed to load then dont hide error message
         document.getElementById("LoadSucc").hidden = request.status;
+        //If using free translation list set global flag
+        isFreeTranslationList = request.isFreeTranslationList;
+        //
         if(request.status == false){
             console.error("Somethind went wrong when trying to load translation file");
         }
@@ -59,9 +64,12 @@ function DisplaySelectLanguageMenu(){
         languageListDiv.appendChild(buttonElement);
     }  
 }
+function DisplayOptionMenu(){
+    document.getElementById("isUsingFreeTranslations").hidden = !isFreeTranslationList;
+}
 const menuList = {
     SelectLanguage: {id:"SelectLanguage",displayFunc:DisplaySelectLanguageMenu},
-    OperationMenu: {id:"OperationsMenu",displayFunc:null}, 
+    OperationMenu: {id:"OperationsMenu",displayFunc:DisplayOptionMenu}, 
     SettingsMenu: {id:"SettingsMenu",displayFunc:null},
     PrevMenu: {id:"PrevMenu",displayFunc:null} // uses prevMenu to go back to menu before prior
 }

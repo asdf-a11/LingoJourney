@@ -99,21 +99,38 @@ function DecodeTranslationFile(string){
   }
   return string;
 }
-async function LoadTranslations(fileName, sendResponse){
+async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
-  console.log("Loading translation of file ", fileName)
-  let isUsingFreeTranslationList = IsFreeTranslationFileName(fileName);
-  let filePath = "LanguageData/"+fileName
-  let link = chrome.runtime.getURL(filePath);
+  console.log("Loading translation of file ", freeTranslationFileName, paidTranslationFileName);
   let response = undefined;
-  let succ = true;
-  try{
-    response = await fetch(link);
+  const translationFolder = "LanguageData/";
+  let isFreeTranslationList = false;
+  if(paidTranslationFileName != null){
+    //Try load paid translations
+    let filePath = translationFolder+paidTranslationFileName;
+    let link = chrome.runtime.getURL(filePath);
+    try{
+      response = await fetch(link);
+    }
+    catch(e){
+      console.log("No paid translation file");    
+      response = undefined;
+    } 
   }
-  catch(e){
-    console.error("Failed to load file ", filePath, " link is ", link);    
-    succ = false;
-  }  
+  //Using free translation list
+  if(response === undefined){
+    let filePath = translationFolder+freeTranslationFileName;
+    let link = chrome.runtime.getURL(filePath);
+    try{
+      response = await fetch(link);
+      isFreeTranslationList = true;
+    }
+    catch(e){
+      console.error("No free translation file found -> ", freeTranslationFileName);    
+      response = undefined;
+    }  
+  }
+  //If found translation parse them
   if(response !== undefined){
     let encodedString = await response.text();
     let jsonString = DecodeTranslationFile(encodedString);
@@ -124,7 +141,10 @@ async function LoadTranslations(fileName, sendResponse){
       translationTargetWordNameList.push(i.targetLangWord);
     }
   }
-  sendResponse({type: "LoadingTranslationDataSucc", status: succ});
+  sendResponse({
+    type: "LoadingTranslationDataSucc", status: response!==undefined,
+    isFreeTranslationList: isFreeTranslationList
+  });
 }
 function SendMessageToContentScript(message, onReciveFunc=undefined) {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -362,7 +382,9 @@ function OpenStatsPage(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){
       case "LoadTranslationData":
-        LoadTranslations(request.fileName, sendResponse);      
+        LoadTranslations(
+          request.freeTranslationFileName, request.paidTranslationFileName, sendResponse
+        );      
         break;
       case "IsYoutubeIntervalRunning":
         sendResponse({data: youtubeIntervalRunning});
