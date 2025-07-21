@@ -2,7 +2,8 @@
 //var prevFileNames = undefined;
 //var hasLoadedFile = false;
 
-let db; // To hold the IndexedDB instance
+//Index db instance to store all paid translation files
+let db; 
 const DB_NAME = 'MyExtensionFilesDB';
 const STORE_NAME = "paidTranslationFiles";
 const DB_VERSION = 1;
@@ -11,25 +12,19 @@ let selectedLanguage = undefined;
 let isFreeTranslationList = undefined;
 
 const languageList = [
-    {name: "russian", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationPath:null}
+    //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
+    //paid...: name of paid file in indexdb database
+    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"}
 ];
 
 function SelectALanguage(languageData){
     console.log("Selected a language ", languageData);
+    //Stores it in global varaible for future reference
     selectedLanguage = languageData;   
-    let filePath;
-    if(languageData.paidTranslationPath == null){
-        //Is using free translation file set bool
-        filePath = languageData.freeTranslationPath;
-    }
-    else{
-        filePath = languageData.paidTranslationPath;
-    }
-    console.log("Loading file ", filePath);
     SendMessageToBackground({
         type: "LoadTranslationData",
-        freeTranslationFileName: languageData.freeTranslationPath,
-        paidTranslationPath: languageData.paidTranslationPath
+        freeTranslationFilePath: languageData.freeTranslationPath,
+        paidTranslationFileName: languageData.paidTranslationFileName
     }, function(request){
         //If failed to load then dont hide error message
         document.getElementById("LoadSucc").hidden = request.status;
@@ -195,69 +190,6 @@ async function SaveIntoDataBase(){
         console.error('IndexedDB operation error:', error);
     }
 }
-async function LoadFromDataBase(){
-    statusMessage.textContent = 'Loading file from IndexedDB...';
-    try {
-        if (!db) await OpenDataBase(); // Ensure DB is open
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-
-        // Assuming you want to load the last saved file, or by a specific name
-        // For simplicity, let's try to get the file with the same name as was last selected.
-        // In a real app, you'd list available files or have a fixed key.
-        const fileNameToLoad = fileInput.files[0] ? fileInput.files[0].name : 'your_default_file_name_if_any';
-        if (!fileNameToLoad || fileNameToLoad === 'your_default_file_name_if_any') {
-            statusMessage.textContent = 'Select a file or specify a name to load.';
-            return;
-        }
-        const getRequest = store.get(fileNameToLoad); // Get by name
-        getRequest.onsuccess = (event) => {
-            const record = event.target.result;
-            if (record) {
-                const loadedFileBlob = record.data; // This is the Blob you saved
-                statusMessage.textContent = `File '${record.name}' loaded from IndexedDB! Type: ${record.type}, Size: ${(loadedFileBlob.size / (1024 * 1024)).toFixed(2)} MB`;
-                console.log('Loaded Blob:', loadedFileBlob);
-
-                // --- IMPORTANT: How to use the loaded Blob ---
-                // 1. If it's an image, you can create an Object URL:
-                // const imageUrl = URL.createObjectURL(loadedFileBlob);
-                // const img = document.createElement('img');
-                // img.src = imageUrl;
-                // document.body.appendChild(img);
-                // img.onload = () => URL.revokeObjectURL(imageUrl); // Clean up
-
-                // 2. If it's a text file, you can read it:
-                // const reader = new FileReader();
-                // reader.onload = (e) => console.log('Loaded text content (first 100 chars):', e.target.result.substring(0, 100));
-                // reader.readAsText(loadedFileBlob);
-
-                // 3. If it's binary data (e.g., for processing):
-                // const reader = new FileReader();
-                // reader.onload = (e) => {
-                //    const arrayBuffer = e.target.result;
-                //    console.log('Loaded ArrayBuffer:', arrayBuffer);
-                //    // Now you can process arrayBuffer with your logic
-                // };
-                // reader.readAsArrayBuffer(loadedFileBlob);
-
-            } else {
-                statusMessage.textContent = `File '${fileNameToLoad}' not found in IndexedDB.`;
-            }
-        };
-        getRequest.onerror = (event) => {
-            statusMessage.textContent = `Error loading file: ${event.target.error.message}`;
-            console.error('Error loading file from IndexedDB:', event.target.error);
-        };
-        await new Promise((resolve, reject) => {
-            transaction.oncomplete = resolve;
-            transaction.onerror = reject;
-        });
-    } catch (error) {
-        statusMessage.textContent = `Operation failed: ${error.message}`;
-        console.error('IndexedDB load operation error:', error);
-    }
-}
-
 function OnSettingsButtonClicked(){
     ChangeMenu(menuList.SettingsMenu.id);
 }
