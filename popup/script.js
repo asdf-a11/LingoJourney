@@ -1,13 +1,6 @@
-//imgPath is relative to assets/Flags and
-//translation paths a relitive to LanguageData
-
-
-//const BASIC_TRANSLATION_FILES = [
-//    "RUtoEN_free.txt"
-//];
-const MAX_NUMBER_OF_FILES = 3;
-var prevFileNames = undefined;
-var hasLoadedFile = false;
+//const MAX_NUMBER_OF_FILES = 3;
+//var prevFileNames = undefined;
+//var hasLoadedFile = false;
 
 let db; // To hold the IndexedDB instance
 const DB_NAME = 'MyExtensionFilesDB';
@@ -147,30 +140,6 @@ function DownloadStringAsFile(filename, content) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 }
-/*
-function LoadPrevoiseFileNames(){
-    chrome.storage.sync.get({
-        prevFileNames: []
-    }, function(result) {        
-        prevFileNames = result.prevFileNames;
-        console.log("Setting prevoise file names, ", )
-        let e = document.getElementById("fileNameList");
-        prevFileNames.length = Math.min(prevFileNames.length,MAX_NUMBER_OF_FILES);
-        for(let i = 0; i < prevFileNames.length; i++){
-            let b = document.createElement("option");
-            b.value = prevFileNames[i];
-            e.appendChild(b);
-        }  
-        for(let i = 0; i < BASIC_TRANSLATION_FILES.length; i++){
-            if(prevFileNames.indexOf(BASIC_TRANSLATION_FILES[i]) == -1){
-                let b = document.createElement("option");
-                b.value = BASIC_TRANSLATION_FILES[i];
-                e.appendChild(b);
-            }
-        } 
-    });
-}    
-*/
 //Opens the index db database that is used for storing paid translation files
 function OpenDataBase(){
     return new Promise((resolve, reject) => {
@@ -201,46 +170,35 @@ async function SaveIntoDataBase(){
         return;
     }
     const file = fileInput.files[0];
-
     let statusMessage = document.getElementById("statusMessage");
-
     statusMessage.textContent = `Saving ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)...`;
-
     try {
         if (!db) await OpenDataBase(); // Ensure DB is open
-
         const transaction = db.transaction([STORE_NAME], 'readwrite');
         const store = transaction.objectStore(STORE_NAME);
-
         // Store the file directly as a Blob
         const putRequest = store.put({ name: file.name, type: file.type, data: file }); // Store Blob directly
-
         putRequest.onsuccess = () => {
             statusMessage.textContent = `File '${file.name}' saved to IndexedDB successfully!`;
             console.log(`File '${file.name}' stored in IndexedDB.`);
         };
-
         putRequest.onerror = (event) => {
             statusMessage.textContent = `Error saving file: ${event.target.error.message}`;
             console.error('Error saving file to IndexedDB:', event.target.error);
         };
-
         await new Promise((resolve, reject) => {
             transaction.oncomplete = resolve;
             transaction.onerror = reject;
         });
-
     } catch (error) {
         statusMessage.textContent = `Operation failed: ${error.message}`;
         console.error('IndexedDB operation error:', error);
     }
-    //});
 }
 async function LoadFromDataBase(){
     statusMessage.textContent = 'Loading file from IndexedDB...';
     try {
         if (!db) await OpenDataBase(); // Ensure DB is open
-
         const transaction = db.transaction([STORE_NAME], 'readonly');
         const store = transaction.objectStore(STORE_NAME);
 
@@ -248,14 +206,11 @@ async function LoadFromDataBase(){
         // For simplicity, let's try to get the file with the same name as was last selected.
         // In a real app, you'd list available files or have a fixed key.
         const fileNameToLoad = fileInput.files[0] ? fileInput.files[0].name : 'your_default_file_name_if_any';
-
         if (!fileNameToLoad || fileNameToLoad === 'your_default_file_name_if_any') {
             statusMessage.textContent = 'Select a file or specify a name to load.';
             return;
         }
-
         const getRequest = store.get(fileNameToLoad); // Get by name
-
         getRequest.onsuccess = (event) => {
             const record = event.target.result;
             if (record) {
@@ -289,17 +244,14 @@ async function LoadFromDataBase(){
                 statusMessage.textContent = `File '${fileNameToLoad}' not found in IndexedDB.`;
             }
         };
-
         getRequest.onerror = (event) => {
             statusMessage.textContent = `Error loading file: ${event.target.error.message}`;
             console.error('Error loading file from IndexedDB:', event.target.error);
         };
-
         await new Promise((resolve, reject) => {
             transaction.oncomplete = resolve;
             transaction.onerror = reject;
         });
-
     } catch (error) {
         statusMessage.textContent = `Operation failed: ${error.message}`;
         console.error('IndexedDB load operation error:', error);
@@ -307,22 +259,9 @@ async function LoadFromDataBase(){
 }
 
 function OnSettingsButtonClicked(){
-    //HideAllMenues();
-    //document.getElementById("SettingsMenu").hidden = false;
-    //document.getElementById("SettingsButtonDiv").hidden = true;
     ChangeMenu(menuList.SettingsMenu.id);
 }
 function OnExitSettingsClicked(){
-    /*
-    HideAllMenues();
-    if(hasLoadedFile === true){
-        document.getElementById("OperationsMenu").hidden = false;
-    }
-    else{
-        document.getElementById("SelectTranslationFile").hidden = false;  
-    }
-    document.getElementById("SettingsButtonDiv").hidden = false;
-    */
     ChangeMenu(menuList.PrevMenu.id);
 }
 //Dowloads the list of all known words to users dowload folder
@@ -334,30 +273,6 @@ function OnDowloadKnownWords(){
         DownloadStringAsFile("Lingo Journey - known word list.txt", string);
     });
 }
-/*
-function OnSelectedTranslationFile(){
-    let fileName = document.getElementById("fileName_input").value;
-    if(prevFileNames.indexOf(fileName) == -1){
-        prevFileNames.unshift(fileName);
-    }
-    chrome.storage.sync.set({
-        prevFileNames: prevFileNames
-    }, function() {  });
-    SendMessageToBackground({
-        type: "LoadTranslationData",
-        fileName: fileName
-    }, function(request){
-        document.getElementById("LoadSucc").hidden = request.status;
-        if(request.status == false){
-            VeiwSelectTranslationFile();
-        }
-        else{
-            VeiwOperationMenu();
-        }
-    });    
-    hasLoadedFile = true;
-}
-*/
 function OnUploadNewTranslations(){
     ChangeMenu(menuList.UploadTranslationFile.id);
 }
