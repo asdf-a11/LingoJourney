@@ -9,6 +9,11 @@ const MAX_NUMBER_OF_FILES = 3;
 var prevFileNames = undefined;
 var hasLoadedFile = false;
 
+let db; // To hold the IndexedDB instance
+const DB_NAME = 'MyExtensionFilesDB';
+const STORE_NAME = "paidTranslationFiles";
+const DB_VERSION = 1;
+
 let selectedLanguage = undefined;
 let isFreeTranslationList = undefined;
 
@@ -168,13 +173,137 @@ function LoadPrevoiseFileNames(){
 */
 //Opens the index db database that is used for storing paid translation files
 function OpenDataBase(){
-
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                // Create an object store to hold our files. KeyPath could be 'name' or 'id'
+                db.createObjectStore(STORE_NAME, { keyPath: 'name' });
+            }
+        };
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("Database has be opened");
+            //saveFileButton.disabled = true;
+            resolve(db);
+        };
+        request.onerror = (event) => {
+            console.error('IndexedDB error:', event.target.error);
+            reject(event.target.error);
+        };
+    });
 }
-function SaveIntoDataBase(){
+async function SaveIntoDataBase(){
+    //saveFileBtn.addEventListener('click', async () => {
+    if (!fileInput.files || fileInput.files.length === 0) {
+        statusMessage.textContent = 'Please select a file first!';
+        return;
+    }
+    const file = fileInput.files[0];
 
+    let statusMessage = document.getElementById("statusMessage");
+
+    statusMessage.textContent = `Saving ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)...`;
+
+    try {
+        if (!db) await OpenDataBase(); // Ensure DB is open
+
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+
+        // Store the file directly as a Blob
+        const putRequest = store.put({ name: file.name, type: file.type, data: file }); // Store Blob directly
+
+        putRequest.onsuccess = () => {
+            statusMessage.textContent = `File '${file.name}' saved to IndexedDB successfully!`;
+            console.log(`File '${file.name}' stored in IndexedDB.`);
+        };
+
+        putRequest.onerror = (event) => {
+            statusMessage.textContent = `Error saving file: ${event.target.error.message}`;
+            console.error('Error saving file to IndexedDB:', event.target.error);
+        };
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = resolve;
+            transaction.onerror = reject;
+        });
+
+    } catch (error) {
+        statusMessage.textContent = `Operation failed: ${error.message}`;
+        console.error('IndexedDB operation error:', error);
+    }
+    //});
 }
-function LoadFromDataBase(){
+async function LoadFromDataBase(){
+    statusMessage.textContent = 'Loading file from IndexedDB...';
+    try {
+        if (!db) await OpenDataBase(); // Ensure DB is open
 
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+
+        // Assuming you want to load the last saved file, or by a specific name
+        // For simplicity, let's try to get the file with the same name as was last selected.
+        // In a real app, you'd list available files or have a fixed key.
+        const fileNameToLoad = fileInput.files[0] ? fileInput.files[0].name : 'your_default_file_name_if_any';
+
+        if (!fileNameToLoad || fileNameToLoad === 'your_default_file_name_if_any') {
+            statusMessage.textContent = 'Select a file or specify a name to load.';
+            return;
+        }
+
+        const getRequest = store.get(fileNameToLoad); // Get by name
+
+        getRequest.onsuccess = (event) => {
+            const record = event.target.result;
+            if (record) {
+                const loadedFileBlob = record.data; // This is the Blob you saved
+                statusMessage.textContent = `File '${record.name}' loaded from IndexedDB! Type: ${record.type}, Size: ${(loadedFileBlob.size / (1024 * 1024)).toFixed(2)} MB`;
+                console.log('Loaded Blob:', loadedFileBlob);
+
+                // --- IMPORTANT: How to use the loaded Blob ---
+                // 1. If it's an image, you can create an Object URL:
+                // const imageUrl = URL.createObjectURL(loadedFileBlob);
+                // const img = document.createElement('img');
+                // img.src = imageUrl;
+                // document.body.appendChild(img);
+                // img.onload = () => URL.revokeObjectURL(imageUrl); // Clean up
+
+                // 2. If it's a text file, you can read it:
+                // const reader = new FileReader();
+                // reader.onload = (e) => console.log('Loaded text content (first 100 chars):', e.target.result.substring(0, 100));
+                // reader.readAsText(loadedFileBlob);
+
+                // 3. If it's binary data (e.g., for processing):
+                // const reader = new FileReader();
+                // reader.onload = (e) => {
+                //    const arrayBuffer = e.target.result;
+                //    console.log('Loaded ArrayBuffer:', arrayBuffer);
+                //    // Now you can process arrayBuffer with your logic
+                // };
+                // reader.readAsArrayBuffer(loadedFileBlob);
+
+            } else {
+                statusMessage.textContent = `File '${fileNameToLoad}' not found in IndexedDB.`;
+            }
+        };
+
+        getRequest.onerror = (event) => {
+            statusMessage.textContent = `Error loading file: ${event.target.error.message}`;
+            console.error('Error loading file from IndexedDB:', event.target.error);
+        };
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = resolve;
+            transaction.onerror = reject;
+        });
+
+    } catch (error) {
+        statusMessage.textContent = `Operation failed: ${error.message}`;
+        console.error('IndexedDB load operation error:', error);
+    }
 }
 
 function OnSettingsButtonClicked(){
@@ -241,13 +370,27 @@ function OnWordifyYoutube(){
 function OnStatButtonPress(){
     SendMessageToBackground({type: "OpenStatsPage"});
 }
-//window.onload = function(){}
-
+function UploadTranslationMenuInit(){
+    let fileInput = document.getElementById("fileInput");
+    let saveFileButton = document.getElementById("addFileButton");
+    fileInput.addEventListener('change', (event) => {        
+        let statusMessage = document.getElementById("statusMessage");
+        if (event.target.files.length > 0) {
+            saveFileButton.disabled = false;
+            statusMessage.textContent = `Selected: ${event.target.files[0].name}`;
+        } else {
+            saveFileButton.disabled = true;
+            statusMessage.textContent = 'No file selected.';
+        }
+    });
+    saveFileButton.addEventListener('click', SaveIntoDataBase);
+    // Initialize the database on startup
+    OpenDataBase().catch(e => console.error("Failed to open DB on startup", e));
+}
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOing something");
     ChangeMenu(menuList.SelectLanguage.id);
-    //LoadPrevoiseFileNames();
-    //document.getElementById("pickedFileName_button").onclick = OnSelectedTranslationFile;
+    UploadTranslationMenuInit();
     document.getElementById("WordifyWholePage_button").onclick = OnWordifyWholePage;
     document.getElementById("WordifyYoutube_button").onclick = OnWordifyYoutube;
     document.getElementById("SettingsButton").onclick = OnSettingsButtonClicked;
