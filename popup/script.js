@@ -67,11 +67,15 @@ function DisplaySelectLanguageMenu(){
 function DisplayOptionMenu(){
     document.getElementById("isUsingFreeTranslations").hidden = !isFreeTranslationList;
 }
+function DisplayUploadTranslationFile(){
+
+}
 const menuList = {
     SelectLanguage: {id:"SelectLanguage",displayFunc:DisplaySelectLanguageMenu},
     OperationMenu: {id:"OperationsMenu",displayFunc:DisplayOptionMenu}, 
     SettingsMenu: {id:"SettingsMenu",displayFunc:null},
-    PrevMenu: {id:"PrevMenu",displayFunc:null} // uses prevMenu to go back to menu before prior
+    PrevMenu: {id:"PrevMenu",displayFunc:null}, // uses prevMenu to go back to menu before prior
+    UploadTranslationFile: {id:"UploadTranslationFile", displayFunc:DisplayUploadTranslationFile}
 }
 let currentMenuId = undefined;
 let prevMenuId = undefined;
@@ -162,13 +166,25 @@ function LoadPrevoiseFileNames(){
     });
 }    
 */
+//Opens the index db database that is used for storing paid translation files
+function OpenDataBase(){
+
+}
+function SaveIntoDataBase(){
+
+}
+function LoadFromDataBase(){
+
+}
 
 function OnSettingsButtonClicked(){
-    HideAllMenues();
-    document.getElementById("SettingsMenu").hidden = false;
-    document.getElementById("SettingsButtonDiv").hidden = true;
+    //HideAllMenues();
+    //document.getElementById("SettingsMenu").hidden = false;
+    //document.getElementById("SettingsButtonDiv").hidden = true;
+    ChangeMenu(menuList.SettingsMenu.id);
 }
 function OnExitSettingsClicked(){
+    /*
     HideAllMenues();
     if(hasLoadedFile === true){
         document.getElementById("OperationsMenu").hidden = false;
@@ -177,6 +193,8 @@ function OnExitSettingsClicked(){
         document.getElementById("SelectTranslationFile").hidden = false;  
     }
     document.getElementById("SettingsButtonDiv").hidden = false;
+    */
+    ChangeMenu(menuList.PrevMenu.id);
 }
 //Dowloads the list of all known words to users dowload folder
 function OnDowloadKnownWords(){
@@ -211,6 +229,9 @@ function OnSelectedTranslationFile(){
     hasLoadedFile = true;
 }
 */
+function OnUploadNewTranslations(){
+    ChangeMenu(menuList.UploadTranslationFile.id);
+}
 function OnWordifyWholePage(){
     SendMessageToBackground({type: "StartUpdatePage"});
 }
@@ -233,4 +254,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("ExitSettingsButton").onclick = OnExitSettingsClicked;
     document.getElementById("DowloadKnownWordsButton").onclick = OnDowloadKnownWords;
     document.getElementById("StatsButton").onclick = OnStatButtonPress;
+    document.getElementById("UploadPaidTranslations").onclick = OnUploadNewTranslations;
 });
