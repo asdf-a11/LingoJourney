@@ -131,6 +131,7 @@ function OpenDataBase(){
       };
   });
 }
+/*
 async function LoadFromDataBase(fileName){
   //Clear it so can detect errors if read hasn't worked
   let translationFileString = undefined;
@@ -138,61 +139,22 @@ async function LoadFromDataBase(fileName){
       if (!db) await OpenDataBase(); // Ensure DB is open
       const transaction = db.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
-
-      // Assuming you want to load the last saved file, or by a specific name
-      // For simplicity, let's try to get the file with the same name as was last selected.
-      // In a real app, you'd list available files or have a fixed key.
-      //const fileNameToLoad = fileInput.files[0] ? fileInput.files[0].name : 'your_default_file_name_if_any';
-      //if (!fileNameToLoad || fileNameToLoad === 'your_default_file_name_if_any') {
-      //    statusMessage.textContent = 'Select a file or specify a name to load.';
-      //    return;
-      //}
       const allKeys = store.getAllKeys();
       console.log("All keys in database", allKeys);
-      const getRequest = store.get(fileName); // Get by name
+      const getRequest = store.get(fileName); // Get by file name
       getRequest.onsuccess = (event) => {
           const record = event.target.result;
           if (record) {
-              const loadedFileBlob = record.data; // This is the Blob you saved
-              //statusMessage.textContent = `File '${record.name}' loaded from IndexedDB! Type: ${record.type}, Size: ${(loadedFileBlob.size / (1024 * 1024)).toFixed(2)} MB`;
-              //console.log('Loaded Blob:', loadedFileBlob);
-
-
-              // --- IMPORTANT: How to use the loaded Blob ---
-              // 1. If it's an image, you can create an Object URL:
-              // const imageUrl = URL.createObjectURL(loadedFileBlob);
-              // const img = document.createElement('img');
-              // img.src = imageUrl;
-              // document.body.appendChild(img);
-              // img.onload = () => URL.revokeObjectURL(imageUrl); // Clean up
-
-              // 2. If it's a text file, you can read it:
-              //const reader = new FileReader();
-              //reader.onload = (e) => console.log('Loaded text content (first 100 chars):', e.target.result.substring(0, 100));
-              //reader.readAsText(loadedFileBlob);
-              //Read the contents of the file to a string
+              const loadedFileBlob = record.data;
               loadedFileBlob.text().then(text => {
                 console.log('Loaded text content (first 100 chars):', text.substring(0, 100));
-                //store it as a global variable
                 translationFileString = text;
               });
-
-              // 3. If it's binary data (e.g., for processing):
-              // const reader = new FileReader();
-              // reader.onload = (e) => {
-              //    const arrayBuffer = e.target.result;
-              //    console.log('Loaded ArrayBuffer:', arrayBuffer);
-              //    // Now you can process arrayBuffer with your logic
-              // };
-              // reader.readAsArrayBuffer(loadedFileBlob);
-
           } else {
-            //statusMessage.textContent = `File '${fileNameToLoad}' not found in IndexedDB.`;
             console.error(`File '${fileName}' not found in IndexedDB.`);
           }
       };
       getRequest.onerror = (event) => {
-          //statusMessage.textContent = `Error loading file: ${event.target.error.message}`;
           console.error('Error loading file from IndexedDB:', event.target.error);
       };
       await new Promise((resolve, reject) => {
@@ -200,10 +162,38 @@ async function LoadFromDataBase(fileName){
           transaction.onerror = reject;
       });
   } catch (error) {
-      //statusMessage.textContent = `Operation failed: ${error.message}`;
       console.error('IndexedDB load operation error:', error);
   }
   return translationFileString;
+}
+  */
+async function LoadFromDataBase(fileName) {
+    try {
+        if (!db) await OpenDataBase(); // Ensure DB is open
+
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+
+        const record = await new Promise((resolve, reject) => {
+            const getRequest = store.get(fileName);
+            getRequest.onsuccess = (event) => resolve(event.target.result);
+            getRequest.onerror = (event) => reject(event.target.error);
+        });
+
+        if (!record) {
+            console.error(`File '${fileName}' not found in IndexedDB.`);
+            return undefined;
+        }
+
+        const loadedFileBlob = record.data;
+        const text = await loadedFileBlob.text();
+
+        console.log('Loaded text content (first 100 chars):', text.substring(0, 100));
+        return text;
+    } catch (error) {
+        console.error('IndexedDB load operation error:', error);
+        return undefined;
+    }
 }
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
@@ -237,49 +227,6 @@ async function LoadTranslations(freeTranslationFileName, paidTranslationFileName
       translationTargetWordNameList.push(i.targetLangWord);
     }
   }
-
-
-  /*
-  let response = undefined;
-  const translationFolder = "LanguageData/";
-  let isFreeTranslationList = false;
-  if(paidTranslationFileName != null){
-    //Try load paid translations
-    let filePath = translationFolder+paidTranslationFileName;
-    let link = chrome.runtime.getURL(filePath);
-    try{
-      response = await fetch(link);
-    }
-    catch(e){
-      console.log("No paid translation file");    
-      response = undefined;
-    } 
-  }
-  //Using free translation list
-  if(response === undefined){
-    let filePath = translationFolder+freeTranslationFileName;
-    let link = chrome.runtime.getURL(filePath);
-    try{
-      response = await fetch(link);
-      isFreeTranslationList = true;
-    }
-    catch(e){
-      console.error("No free translation file found -> ", freeTranslationFileName);    
-      response = undefined;
-    }  
-  }
-  //If found translation parse them
-  if(response !== undefined){
-    let encodedString = await response.text();
-    let jsonString = DecodeTranslationFile(encodedString);
-    translationInfo = JSON.parse(jsonString);
-    //Compiles a list of names of the target lang words
-    translationTargetWordNameList = [];
-    for(let i of translationInfo){
-      translationTargetWordNameList.push(i.targetLangWord);
-    }
-  }
-  */
   sendResponse({
     type: "LoadingTranslationDataSucc", status: translationFileString!==undefined,
     isFreeTranslationList: isFreeTranslationList

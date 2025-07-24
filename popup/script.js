@@ -1,7 +1,3 @@
-//const MAX_NUMBER_OF_FILES = 3;
-//var prevFileNames = undefined;
-//var hasLoadedFile = false;
-
 //Index db instance to store all paid translation files
 let db; 
 const DB_NAME = 'MyExtensionFilesDB';
