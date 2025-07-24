@@ -131,42 +131,6 @@ function OpenDataBase(){
       };
   });
 }
-/*
-async function LoadFromDataBase(fileName){
-  //Clear it so can detect errors if read hasn't worked
-  let translationFileString = undefined;
-  try {
-      if (!db) await OpenDataBase(); // Ensure DB is open
-      const transaction = db.transaction([STORE_NAME], 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
-      const allKeys = store.getAllKeys();
-      console.log("All keys in database", allKeys);
-      const getRequest = store.get(fileName); // Get by file name
-      getRequest.onsuccess = (event) => {
-          const record = event.target.result;
-          if (record) {
-              const loadedFileBlob = record.data;
-              loadedFileBlob.text().then(text => {
-                console.log('Loaded text content (first 100 chars):', text.substring(0, 100));
-                translationFileString = text;
-              });
-          } else {
-            console.error(`File '${fileName}' not found in IndexedDB.`);
-          }
-      };
-      getRequest.onerror = (event) => {
-          console.error('Error loading file from IndexedDB:', event.target.error);
-      };
-      await new Promise((resolve, reject) => {
-          transaction.oncomplete = resolve;
-          transaction.onerror = reject;
-      });
-  } catch (error) {
-      console.error('IndexedDB load operation error:', error);
-  }
-  return translationFileString;
-}
-  */
 async function LoadFromDataBase(fileName) {
     try {
         if (!db) await OpenDataBase(); // Ensure DB is open
