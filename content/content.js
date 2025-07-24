@@ -302,6 +302,7 @@ function RemoveDeletedButtons(buttonIdList){
 //takes whether to do whole page or just youtube sutitles as a string
 function Wordify(argument){
   const BUTTON_ID_STRING = "buttonIdString";
+  //Gets list of all p, h1, h2 etc elements
   textElements = GetElementsToEdit(argument);
   let newButtons = [];
   for(let elementCounter in textElements){
@@ -313,10 +314,10 @@ function Wordify(argument){
     text = ReplaceWithSpace(text);
     //Removes all the accents from the text
     text = RemoveAllAccents(text);
-    //
     const wordList = text.split(" ");
-    //
+    //Remove original text to replace with buttons
     RemoveTextNodes(currentElement);
+    //Loop over each word in the current element
     for(let i = 0; i < wordList.length; i++){
       if(wordList[i].length == 0){ continue; }
       let newButton = document.createElement('button');
