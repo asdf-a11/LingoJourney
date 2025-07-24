@@ -139,7 +139,7 @@ async function LoadFromDataBase(fileName) {
 
         const transaction = db.transaction([STORE_NAME], 'readonly');
         const store = transaction.objectStore(STORE_NAME);
-
+        console.log("indexDB store object, ", store);
         const record = await new Promise((resolve, reject) => {
             const getRequest = store.get(fileName);
             getRequest.onsuccess = (event) => resolve(event.target.result);
@@ -154,7 +154,6 @@ async function LoadFromDataBase(fileName) {
         const loadedFileBlob = record.data;
         const text = await loadedFileBlob.text();
 
-        console.log('Loaded text content (first 100 chars):', text.substring(0, 100));
         return text;
     } catch (error) {
         console.error('IndexedDB load operation error:', error);

@@ -65,7 +65,7 @@ const menuList = {
     SettingsMenu: {id:"SettingsMenu",displayFunc:null},
     PrevMenu: {id:"PrevMenu",displayFunc:null}, // uses prevMenu to go back to menu before prior
     UploadTranslationFile: {id:"UploadTranslationFile", displayFunc:DisplayUploadTranslationFile}
-}
+};
 let currentMenuId = undefined;
 let prevMenuId = undefined;
 
