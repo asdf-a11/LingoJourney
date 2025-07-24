@@ -50,7 +50,7 @@ const DB_NAME = 'MyExtensionFilesDB';
 const STORE_NAME = "paidTranslationFiles";
 const DB_VERSION = 1;
 
-let translationFileString = undefined;
+//let translationFileString = undefined;
 
 function RemoveItemOnce(arr, value) {
   var index = arr.indexOf(value);
@@ -133,7 +133,7 @@ function OpenDataBase(){
 }
 async function LoadFromDataBase(fileName){
   //Clear it so can detect errors if read hasn't worked
-  translationFileString = undefined;
+  let translationFileString = undefined;
   try {
       if (!db) await OpenDataBase(); // Ensure DB is open
       const transaction = db.transaction([STORE_NAME], 'readonly');
@@ -188,7 +188,7 @@ async function LoadFromDataBase(fileName){
 
           } else {
             //statusMessage.textContent = `File '${fileNameToLoad}' not found in IndexedDB.`;
-            console.error(`File '${fileNameToLoad}' not found in IndexedDB.`);
+            console.error(`File '${fileName}' not found in IndexedDB.`);
           }
       };
       getRequest.onerror = (event) => {
@@ -203,16 +203,18 @@ async function LoadFromDataBase(fileName){
       //statusMessage.textContent = `Operation failed: ${error.message}`;
       console.error('IndexedDB load operation error:', error);
   }
+  return translationFileString;
 }
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
   console.log("Loading translation of file ", freeTranslationFileName, paidTranslationFileName);
   let isFreeTranslationList = false;
   //Search indexdb for paid translation file if so set translationFileString
-  await LoadFromDataBase(paidTranslationFileName);
+  let translationFileString = await LoadFromDataBase(paidTranslationFileName);
   if(translationFileString === undefined){
-    //This means paid translations are not installed therefore read from disk
+    //This means paid translations are not installed therefore read from disk    
     let filePath = "LanguageData/"+freeTranslationFileName;
+    console.log("Loading free translations from disk", filePath);
     let link = chrome.runtime.getURL(filePath);
     try{
       response = await fetch(link);
@@ -222,10 +224,10 @@ async function LoadTranslations(freeTranslationFileName, paidTranslationFileName
       console.error("No free translation file found -> ", freeTranslationFileName);    
       response = undefined;
     } 
-    translationFileString = response.text();
+    translationFileString = await response.text();
     isFreeTranslationList = true;
   }
-  if(translationFileString !== undefined){
+  if(translationFileString !== undefined){   
     //Stored using dictionary encoding therefore needs to be decoded
     let jsonString = DecodeTranslationFile(translationFileString);
     translationInfo = JSON.parse(jsonString);
