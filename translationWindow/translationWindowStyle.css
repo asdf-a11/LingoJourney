@@ -24,3 +24,6 @@ h2 {
     color: red;
     font-style: bold;
 }
+.volumeControllDiv{
+    display: inline;
+}

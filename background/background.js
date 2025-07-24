@@ -42,6 +42,8 @@ var currentlyClickedWord = {
 //Stores the tab id of the last content script tab
 //Done because not active when translation window is sending to background script so need to store id
 var contentScriptTabId = null;
+//Stores the volume to play sound in translation window (0-1)
+let volumeLevel = 1;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -448,10 +450,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         DisplayTranslationWindow(request.targetWord, request.wordStatus);
         break;
       case "GetInfoForTranslationWindow":
-        sendResponse(currentlyClickedWord);
+        let infoToSend = currentlyClickedWord;
+        infoToSend["volumeLevel"] = volumeLevel;
+        sendResponse(infoToSend);
         break;
       case "SendingClosingTranslationWindowInfo":
         UpdateStatusOfWord(request.targetLangWord, request.oldWordStatus, request.newWordStatus);
+        volumeLevel = request.volumeLevel;
         chrome.tabs.sendMessage(contentScriptTabId, {
             type: "UpdateWordColours",
             targetLangWord: request.targetLangWord,

@@ -7,7 +7,8 @@ var isUsingFreeTranslationList = null;
 var isExactWord = null;
 var approximationWord = null;
 var wordFreq = null;
-
+//range from 0-1
+let volumeLevel = 1;
 
 
 function SendMessageToBackground(message, onResponseFunction){
@@ -75,7 +76,7 @@ function SoundWord(){
         var msg = new SpeechSynthesisUtterance();
         var voices = window.speechSynthesis.getVoices();
         msg.voice = voices[0]; 
-        msg.volume = 1; // From 0 to 1
+        msg.volume = volumeLevel; // From 0 to 1
         msg.rate = 1; // From 0.1 to 10
         msg.pitch = 2; // From 0 to 2
         msg.text = targetLangWord;
@@ -86,12 +87,28 @@ function SoundWord(){
         document.getElementById("noSpeechSynth").hidden = false;
     }
 }
+function DisplayCurrentVolumeLevel(){
+    document.getElementById("volumeLevel").textContent = Math.round(volumeLevel*10).toString();
+}
+function AttachMethodsToVolumeButtons(){
+    const stepSize = 1/10;
+    document.getElementById("volumeDownButton").onclick = function(){
+        volumeLevel -= stepSize;
+        if(volumeLevel < 0){ volumeLevel = 0; }
+        DisplayCurrentVolumeLevel();
+    };
+    document.getElementById("volumeUpButton").onclick = function(){
+        volumeLevel += stepSize;
+        if(volumeLevel > 1){ volumeLevel = 1; }
+        DisplayCurrentVolumeLevel();
+    }
+}
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "CloseTranslationWindow") {
         window.close();
     }
 });     
-window.onload = function(){      
+window.onload = function(){     
     chrome.runtime.sendMessage({ type: "GetInfoForTranslationWindow" }, (message) => {
         //Move values into global varaibles
         targetLangWord = message.targetLangWord;
@@ -102,6 +119,7 @@ window.onload = function(){
         isExactWord = message.isExactWord;
         approximationWord = message.approximationWord;
         wordFreq = message.freq;
+        volumeLevel = message.volumeLevel;
         console.log(message);
         //Unknown words auto set to learning
         newWordStatus = oldWordStatus;
@@ -109,6 +127,8 @@ window.onload = function(){
             newWordStatus = "learning";
         }
         //
+        DisplayCurrentVolumeLevel(); 
+        AttachMethodsToVolumeButtons();
         AttachClickFunctionToButtons();     
         SetButtonColour();
         ShowMessageIfFreeTranslationList();
@@ -123,6 +143,7 @@ window.onbeforeunload = function(){
         type: "SendingClosingTranslationWindowInfo",
         targetLangWord: targetLangWord,
         oldWordStatus: oldWordStatus,
-        newWordStatus: newWordStatus
+        newWordStatus: newWordStatus,
+        volumeLevel: volumeLevel
     });
 }
