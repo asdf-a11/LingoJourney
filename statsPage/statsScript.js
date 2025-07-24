@@ -39,7 +39,13 @@ function UpdateAllGraphs(){
 function WriteStatsToPage(){
   document.getElementById("learningWordsNumber").textContent = numberOfLearningWords.toString();
   document.getElementById("knownWordsNumber").textContent = numberOfKnownWords.toString();
-  document.getElementById("percentageKnownWords").textContent = (percentageKnownWords*100).toString();
+  //Can be null if stats page opened before translations are loaded
+  if(percentageKnownWords != null){
+    document.getElementById("percentageKnownWords").textContent = (percentageKnownWords*100).toString();
+  }  
+  else{
+    document.getElementById("percentageKnownWords").textContent = "N/A";
+  }
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

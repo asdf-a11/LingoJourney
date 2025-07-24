@@ -395,6 +395,11 @@ function SetContentScriptTabId(){
   });
 }
 function CalculatePercentageKnownWords(){
+  //If translation file has not been loaded cannot calculate
+  //percentage known words therefore return null
+  if(translationInfo == undefined){
+    return null;
+  }
   let totalFreq = 0;
   for(let word of knownWordList){
     let translationObject = GetTranslation(word);
@@ -411,6 +416,8 @@ function CalculatePercentageKnownWords(){
   return totalFreq / totalFreqOfAllWords;
 }
 function OpenStatsPage(){
+  //Make sure known and learning words a loaded
+  LoadKnownAndLearningWords();
   //Calculate stats
   let numberOfKnownWords = knownWordList.length;
   let numberOfLearningWords = learningWordList.length;
