@@ -11,18 +11,6 @@
             <h1>Lingo Journey</h1>
         </div>
         <div hidden id="SelectLanguage">
-            <!--<p id="LoadSucc" class="errorText" hidden>The file you enterd does not exist or could not be loaded. Please try again.</p>
-            <p>Enter Translation File Name: (relative to LanguageData folder within the extension)</p>
-            <input list="fileNameList" id="fileName_input" name="fileName_input" size="30">
-            <datalist id="fileNameList">
-            </datalist>
-            <br><br>
-            <div class="centerButton">
-                <button type="button" id="pickedFileName_button">
-                    Click to continue
-                </button>
-            </div>      
-            -->
             <p id="LoadSucc" class="errorText" hidden>
                 The file you enterd does not exist or could not be loaded. Please try again.
             </p>
@@ -43,7 +31,7 @@
         <div hidden id="SettingsMenu">
             <button id="DowloadKnownWordsButton">Dowload known word list</button>
             <div class="optionInfo">Dowloads a file of all the words wich you know in to a comma seperated file.</div>
-            <button id="ExitSettingsButton">Exit</button>
+            <!--<button id="ExitSettingsButton">Exit</button>-->
         </div>
         <div hidden id="UploadTranslationFile">
             <p>Enter your translation file here:</p>
@@ -51,11 +39,13 @@
             <!--TODO hidden text that when hoverd over displays more info-->
             <input id="fileInput" type="file" accept=".txt"/>
             <button id="addFileButton">Upload</button>
+            <!--<button id="ExitUploadTranslationsButton">Exit</button>-->
         </div>
         <footer>
-            <div id="SettingsButtonDiv"><button id="SettingsButton">Settings</button></div>
-            <button id="UploadPaidTranslations">Upload translation file</button>
+            <button id="SettingsButton">Settings</button>
+            <button id="UploadPaidTranslations">Upload translations</button>
             <button id="StatsButton">Stats</button>
+            <button id="ExitButton">Exit</button>
         </footer>      
         <script src="script.js" type="module"></script>  
     </body>

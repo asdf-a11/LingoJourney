@@ -87,6 +87,11 @@ function GetMenuDataById(idString){
     return undefined;
 }
 function ChangeMenu(newMenuId){
+    //Handles if exit button is pressed on first menu i.e no prev menu to exit to
+    if(prevMenuId == undefined && newMenuId === menuList.PrevMenu.id){
+        console.log("PrevMenuId undefined therefore cant exit");
+        return;
+    }
     console.log("Changing menues from ", currentMenuId, " to ", newMenuId);
     HideAllMenues();
     //Check if backtrack menues
@@ -170,12 +175,12 @@ async function SaveIntoDataBase(){
         // Store the file directly as a Blob
         const putRequest = store.put({ name: file.name, type: file.type, data: file }); // Store Blob directly
         putRequest.onsuccess = () => {
-            statusMessage.textContent = `File '${file.name}' saved to IndexedDB successfully!`;
+            statusMessage.textContent = `File '${file.name}' has been added to Lingo Journey!`;
             console.log(`File '${file.name}' stored in IndexedDB.`);
         };
         putRequest.onerror = (event) => {
-            statusMessage.textContent = `Error saving file: ${event.target.error.message}`;
-            console.error('Error saving file to IndexedDB:', event.target.error);
+            statusMessage.textContent = `Error adding file: ${event.target.error.message}`;
+            console.error('Error adding file to IndexedDB:', event.target.error);
         };
         await new Promise((resolve, reject) => {
             transaction.oncomplete = resolve;
@@ -189,7 +194,7 @@ async function SaveIntoDataBase(){
 function OnSettingsButtonClicked(){
     ChangeMenu(menuList.SettingsMenu.id);
 }
-function OnExitSettingsClicked(){
+function OnExitButtonClicked(){
     ChangeMenu(menuList.PrevMenu.id);
 }
 //Dowloads the list of all known words to users dowload folder
@@ -237,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("WordifyWholePage_button").onclick = OnWordifyWholePage;
     document.getElementById("WordifyYoutube_button").onclick = OnWordifyYoutube;
     document.getElementById("SettingsButton").onclick = OnSettingsButtonClicked;
-    document.getElementById("ExitSettingsButton").onclick = OnExitSettingsClicked;
+    document.getElementById("ExitButton").onclick = OnExitButtonClicked;
     document.getElementById("DowloadKnownWordsButton").onclick = OnDowloadKnownWords;
     document.getElementById("StatsButton").onclick = OnStatButtonPress;
     document.getElementById("UploadPaidTranslations").onclick = OnUploadNewTranslations;
