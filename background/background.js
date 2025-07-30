@@ -160,6 +160,17 @@ async function LoadFromDataBase(fileName) {
         return undefined;
     }
 }
+async function GetFileNamesFromDataBase(){
+  try {
+    if (!db) await OpenDataBase();
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    return store.indexNames;
+  } catch (error) {
+    console.error('IndexedDB load operation error:', error);
+    return undefined;
+  }
+}
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
   console.log("Loading translation of file ", freeTranslationFileName, paidTranslationFileName);
@@ -481,6 +492,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         break;
       case "OpenStatsPage":
         OpenStatsPage();
+        break;
+      case "GetLanguagesWithPremium":
+        GetFileNamesFromDataBase().then((lst) => {
+          sendResponse({premiumList: lst});
+        });        
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":

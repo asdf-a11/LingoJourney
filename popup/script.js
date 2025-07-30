@@ -7,6 +7,8 @@ const DB_VERSION = 1;
 let selectedLanguage = undefined;
 let isFreeTranslationList = undefined;
 
+let premiumList = undefined;
+
 const languageList = [
     //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
     //paid...: name of paid file in indexdb database
@@ -162,7 +164,6 @@ function OpenDataBase(){
     });
 }
 async function SaveIntoDataBase(){
-    //saveFileBtn.addEventListener('click', async () => {
     if (!fileInput.files || fileInput.files.length === 0) {
         statusMessage.textContent = 'Please select a file first!';
         return;
@@ -192,6 +193,12 @@ async function SaveIntoDataBase(){
         statusMessage.textContent = `Operation failed: ${error.message}`;
         console.error('IndexedDB operation error:', error);
     }
+}
+function SetLanguagesWithPremium(){
+    SendMessageToBackground({type: "GetLanguagesWithPremium"}, function(response){
+        console.log("Recived primum list: ", response.premiumList);
+        premiumList = response.premiumList;
+    });
 }
 function OnSettingsButtonClicked(){
     ChangeMenu(menuList.SettingsMenu.id);
@@ -248,4 +255,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("DowloadKnownWordsButton").onclick = OnDowloadKnownWords;
     document.getElementById("StatsButton").onclick = OnStatButtonPress;
     document.getElementById("UploadPaidTranslations").onclick = OnUploadNewTranslations;
+    SetLanguagesWithPremium();
 });
