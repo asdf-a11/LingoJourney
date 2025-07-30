@@ -10,7 +10,9 @@ let isFreeTranslationList = undefined;
 const languageList = [
     //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
     //paid...: name of paid file in indexdb database
-    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"}
+    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"},
+    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"},
+    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"}
 ];
 
 function SelectALanguage(languageData){

@@ -71,3 +71,6 @@ footer {
     border-style: solid;
     border-color: black;
 }
+#languageListDiv{
+    display: flex;
+}
