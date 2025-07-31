@@ -13,8 +13,8 @@ const languageList = [
     //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
     //paid...: name of paid file in indexdb database
     {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"},
-    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"},
-    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"}
+    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "EStoEN_free.txt", paidTranslationFileName: "EStoEN_paid.txt"},
+    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "DEtoEN_free.txt", paidTranslationFileName: "DEtoEN_paid.txt"}
 ];
 
 function SelectALanguage(languageData){
@@ -27,7 +27,9 @@ function SelectALanguage(languageData){
         paidTranslationFileName: languageData.paidTranslationFileName
     }, function(request){
         //If failed to load then dont hide error message
-        document.getElementById("LoadSucc").hidden = request.status;
+        if(request.status === false){
+            console.error("Background failed to load translation data");
+        }
         //If using free translation list set global flag
         isFreeTranslationList = request.isFreeTranslationList;
         //
@@ -52,6 +54,12 @@ function DisplaySelectLanguageMenu(){
         let imgElement = document.createElement("img");
         imgElement.src = imgPath;
         imgElement.className = "languageImage";
+        //If it has a list of premium languages then set buttons clases if premium
+        if(premiumList !== undefined){
+            if(premiumList.includes(languageData.paidTranslationFileName)){
+                buttonElement.className = "premiumLanguageButton";
+            }
+        }
         buttonElement.appendChild(imgElement);
         buttonElement.onclick = function(){SelectALanguage(languageData);}
         languageListDiv.appendChild(buttonElement);
@@ -196,8 +204,10 @@ async function SaveIntoDataBase(){
 }
 function SetLanguagesWithPremium(){
     SendMessageToBackground({type: "GetLanguagesWithPremium"}, function(response){
-        console.log("Recived primum list: ", response.premiumList);
+        console.log("Recived primum list: ", response);
         premiumList = response.premiumList;
+        //Redraw because premium would not have been known
+        DisplaySelectLanguageMenu();
     });
 }
 function OnSettingsButtonClicked(){

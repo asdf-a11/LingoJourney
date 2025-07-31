@@ -44,6 +44,8 @@ var currentlyClickedWord = {
 var contentScriptTabId = null;
 //Stores the volume to play sound in translation window (0-1)
 let volumeLevel = 1;
+//
+let fileNamesInDataBase = undefined;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -161,15 +163,21 @@ async function LoadFromDataBase(fileName) {
     }
 }
 async function GetFileNamesFromDataBase(){
-  try {
-    if (!db) await OpenDataBase();
+  if (!db) await OpenDataBase();
+  return new Promise((resolve, reject) => {    
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    return store.indexNames;
-  } catch (error) {
-    console.error('IndexedDB load operation error:', error);
-    return undefined;
-  }
+    const keyRequest = store.getAllKeys();
+    keyRequest.onsuccess = function () {
+      //fileNamesInDataBase = keyRequest.result;
+      //console.log('Stored file names:', fileNamesInDataBase);
+      resolve(keyRequest.result);
+    };
+    keyRequest.onerror = function () {
+      console.error("Error getting keys");
+      reject(keyRequest.error);
+    };
+  });
 }
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
@@ -494,8 +502,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         OpenStatsPage();
         break;
       case "GetLanguagesWithPremium":
-        GetFileNamesFromDataBase().then((lst) => {
-          sendResponse({premiumList: lst});
+        GetFileNamesFromDataBase().then((fileNameList) => {
+          console.log("here", fileNameList);
+          sendResponse({premiumList: fileNameList});
         });        
         break;
       case "StartUpdatePage":
