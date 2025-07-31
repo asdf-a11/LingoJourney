@@ -24,7 +24,8 @@ function SelectALanguage(languageData){
     SendMessageToBackground({
         type: "LoadTranslationData",
         freeTranslationFilePath: languageData.freeTranslationPath,
-        paidTranslationFileName: languageData.paidTranslationFileName
+        paidTranslationFileName: languageData.paidTranslationFileName,
+        languageToAndFrom: languageData.name
     }, function(request){
         //If failed to load then dont hide error message
         if(request.status === false){

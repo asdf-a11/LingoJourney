@@ -46,6 +46,8 @@ var contentScriptTabId = null;
 let volumeLevel = 1;
 //
 let fileNamesInDataBase = undefined;
+//
+let languageToAndFrom = undefined;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -101,6 +103,7 @@ function DecodeTranslationFile(string){
     " The Russian word ",
     "In full translation list",
     "English", //"Russian",
+    //TODO add new dictionary encodings
     //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
     //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
     //", -0.0", ", 0.0"
@@ -459,6 +462,7 @@ function OpenStatsPage(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){
       case "LoadTranslationData":
+        languageToAndFrom = request.languageToAndFrom;
         LoadTranslations(
           request.freeTranslationFilePath, request.paidTranslationFileName, sendResponse
         );      
