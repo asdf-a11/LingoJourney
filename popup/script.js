@@ -20,7 +20,9 @@ const languageList = [
 function SelectALanguage(languageData){
     console.log("Selected a language ", languageData);
     //Stores it in global varaible for future reference
-    selectedLanguage = languageData;   
+    selectedLanguage = languageData;  
+    //Chnage text to let user know why there is a loading pause
+    document.getElementById("SelectLanguageText").textContent = "Loading translations, please wait..."; 
     SendMessageToBackground({
         type: "LoadTranslationData",
         freeTranslationFilePath: languageData.freeTranslationPath,
@@ -45,6 +47,8 @@ function SelectALanguage(languageData){
 function DisplaySelectLanguageMenu(){  
     //Display languages buttons to user to click on and select a language
     const imageRelPath = "../assets/Flags/";
+    //Set it back as could be changed when to show loading translations
+    document.getElementById("SelectLanguageText").textContent = "Select a language";
     //Clear language display div
     let languageListDiv = document.getElementById("languageListDiv");
     languageListDiv.innerHTML = "";
