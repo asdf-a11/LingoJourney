@@ -1,6 +1,13 @@
 let numberOfKnownWords = undefined;
 let numberOfLearningWords = undefined;
 let percentageKnownWords = undefined;
+let lang = undefined;
+
+const languageDataList = [
+  {lang:"ru", fullName: "Russian", src: "../assets/Flags/russianFlag.png"},
+  {lang:"es", fullName: "Spanish", src: "../assets/Flags/spanishFlag.png"},
+  {lang:"de", fullName: "German", src: "../assets/Flags/germanFlag.png"}
+];
 
 function DrawGraph(canvasIdName, value, minValue, maxValue, checkPointList){
   const canvas = document.getElementById(canvasIdName);
@@ -47,11 +54,30 @@ function WriteStatsToPage(){
     document.getElementById("percentageKnownWords").textContent = "N/A";
   }
 }
+function SetLanguageTitle(){
+  //
+  let fullName = undefined;
+  let src = undefined;
+  for(let i of languageDataList){
+    if(lang === i.lang){
+      fullName = i.fullName;
+      src = i.src;
+    }
+  }
+  if(fullName === undefined || src === undefined){
+    console.error("Cant find language lang = ", lang);
+    return;
+  }
+  document.getElementById("languageName").textContent = fullName;
+  document.getElementById("languageFlag").src = src;
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   numberOfKnownWords = message.numberOfKnownWords;
   numberOfLearningWords = message.numberOfLearningWords;
   percentageKnownWords = message.percentageKnownWords;
+  lang = message.lang;
+  SetLanguageTitle();
   WriteStatsToPage();
   UpdateAllGraphs();
 });

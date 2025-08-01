@@ -38,6 +38,15 @@ main{
 .infoText{
     font-style: italic;
 }
+.flagImg{
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    width: 2.5em;
+    height: 2em;
+    border-style: solid;
+    border-color: black;
+}
 /*
 Colour pallete
 heading colour:

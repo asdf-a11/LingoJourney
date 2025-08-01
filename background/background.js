@@ -377,14 +377,6 @@ function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
     default:
       console.error("Invalid word Status when handling word status change -> ", newStatus);
   }
-  /*
-  chrome.storage.sync.set({
-    learningWordList: learningWordList,
-    knownWordList: knownWordList
-  }, function() {
-    console.log("Updated word lists word " + targetWord + "  ,  " + newStatus);
-  });
-  */
  UpdateWordLists(targetWord, newStatus);
 }
 function UpdateWordLists(targetWord, newStatus){
@@ -505,7 +497,8 @@ function OpenStatsPage(){
         let msgToStatsPage = {
           numberOfKnownWords: numberOfKnownWords,
           numberOfLearningWords: numberOfLearningWords,
-          percentageKnownWords: percentageKnownWords
+          percentageKnownWords: percentageKnownWords,
+          lang: lang
         };
         chrome.tabs.sendMessage(tab.id, msgToStatsPage);
       }
