@@ -103,7 +103,8 @@ function DecodeTranslationFile(string){
     " The Russian word ",
     "In full translation list",
     "English", //"Russian",
-    //TODO add new dictionary encodings
+    "The Spanish word ",
+    " translates to ",
     //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
     //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
     //", -0.0", ", 0.0"
