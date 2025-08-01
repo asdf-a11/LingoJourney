@@ -47,8 +47,9 @@ let volumeLevel = 1;
 //
 let fileNamesInDataBase = undefined;
 //
-let languageToAndFrom = undefined;
-let languageTo = undefined;
+//let languageToAndFrom = undefined;
+//let languageTo = undefined;
+let lang = undefined;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -70,15 +71,32 @@ function ActionMessage(request, sender, sendResponse){
   SendMessageToContentScript(request);
 }
 function LoadKnownAndLearningWords(){
-  if(languageTo === undefined){
+  if(lang === undefined){
     console.error("Cannot load learning and known words untill langaugeTo is defiend");
     return;
   }
   chrome.storage.sync.get({
+    //If doesnt not exist then set deaults
+    knownWordList: [],
+    learningWordList: [],
+    [lang]: []
   }, function(result) {
-    console.log(result);
-    knownWordList = result.knownWordList;
-    learningWordList = result.learningWordList;
+    console.log("results ",result,lang);
+    let oldRussianWordsKnown = result.knownWordList;
+    let oldRussianWordsLearning = result.learningWordList;
+    knownWordList = result[lang].knownWordList;
+    learningWordList = result[lang].learningWordList;
+
+    //Check for backwards compatibility
+    if(lang === "ru"){
+      if(oldRussianWordsKnown.length > 0 || oldRussianWordsLearning > 0){
+        if(knownWordList == undefined || learningWordList == undefined){
+          console.log("Moving words from old store way to new!!!!!");
+          knownWordList = oldRussianWordsKnown;
+          learningWordList = oldRussianWordsLearning;
+        }
+      }
+    }
   });
 }
 async function LoadTranslationWindowHTML(){
@@ -370,7 +388,7 @@ function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
  UpdateWordLists(targetWord, newStatus);
 }
 function UpdateWordLists(targetWord, newStatus){
-  if(languageTo === undefined){
+  if(lang === undefined){
     console.error("Doesnt know what language to save wordlists for");
     return;
   }
@@ -379,20 +397,20 @@ function UpdateWordLists(targetWord, newStatus){
     const updatedData = data || {};
 
     // Initialize language object if it doesn't exist
-    if (!updatedData[languageTo]) {
-      updatedData[languageTo] = {
+    if (!updatedData[lang]) {
+      updatedData[lang] = {
         knownWordList: [],
         learningWordList: []
       };
     }
 
     // Update only this language's word lists
-    updatedData[languageTo].knownWordList = knownWordList;
-    updatedData[languageTo].learningWordList = learningWordList;
+    updatedData[lang].knownWordList = knownWordList;
+    updatedData[lang].learningWordList = learningWordList;
 
     // Save back only the updated language block
-    chrome.storage.sync.set({ [languageTo]: updatedData[languageTo] }, function() {
-      console.log("Updated word lists for '" + languageTo + "' with word: " + targetWord + " (" + newStatus + ")");
+    chrome.storage.sync.set({ [lang]: updatedData[lang] }, function() {
+      console.log("Updated word lists for '" + lang + "' with word: " + targetWord + " (" + newStatus + ")");
     });
   });  
 }
@@ -497,7 +515,10 @@ function OpenStatsPage(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) { 
     switch(request.type){
       case "LoadTranslationData":
-        languageToAndFrom = request.languageToAndFrom;
+        //languageToAndFrom = request.languageToAndFrom;
+        lang = request.lang;
+        //Load words once user selects a language
+        LoadKnownAndLearningWords();
         LoadTranslations(
           request.freeTranslationFilePath, request.paidTranslationFileName, sendResponse
         );      
@@ -588,4 +609,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     return true;
 });
 
-LoadKnownAndLearningWords();
+//LoadKnownAndLearningWords();

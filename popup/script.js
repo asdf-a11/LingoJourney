@@ -11,10 +11,10 @@ let premiumList = undefined;
 
 const languageList = [
     //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
-    //paid...: name of paid file in indexdb database
-    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt"},
-    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "EStoEN_free.txt", paidTranslationFileName: "EStoEN_paid.txt"},
-    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "DEtoEN_free.txt", paidTranslationFileName: "DEtoEN_paid.txt"}
+    //paid...: name of paid file in indexdb database lang: The language the user is truing to learn 
+    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.txt", paidTranslationFileName: "RUtoEN_paid.txt", lang: "ru"},
+    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "EStoEN_free.txt", paidTranslationFileName: "EStoEN_paid.txt", lang: "es"},
+    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "DEtoEN_free.txt", paidTranslationFileName: "DEtoEN_paid.txt",  lang: "de"}
 ];
 
 function SelectALanguage(languageData){
@@ -25,7 +25,7 @@ function SelectALanguage(languageData){
         type: "LoadTranslationData",
         freeTranslationFilePath: languageData.freeTranslationPath,
         paidTranslationFileName: languageData.paidTranslationFileName,
-        languageToAndFrom: languageData.name
+        lang: languageData.lang
     }, function(request){
         //If failed to load then dont hide error message
         if(request.status === false){
