@@ -208,7 +208,7 @@ async function GetFileNamesFromDataBase(){
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
   console.log("Loading translation of file ", freeTranslationFileName, paidTranslationFileName);
-  let isFreeTranslationList = false;
+  isFreeTranslationList = false;
   //Search indexdb for paid translation file if so set translationFileString
   let translationFileString = await LoadFromDataBase(paidTranslationFileName);
   if(translationFileString === undefined){
@@ -498,6 +498,7 @@ function OpenStatsPage(){
           numberOfKnownWords: numberOfKnownWords,
           numberOfLearningWords: numberOfLearningWords,
           percentageKnownWords: percentageKnownWords,
+          isFreeTranslationList: isUsingFreeTranslationList,
           lang: lang
         };
         chrome.tabs.sendMessage(tab.id, msgToStatsPage);

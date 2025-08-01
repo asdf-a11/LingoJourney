@@ -47,6 +47,13 @@ main{
     border-style: solid;
     border-color: black;
 }
+#premiumText{
+    font-size: 1.5em;
+    color: goldenrod;
+    text-align: center;
+    /*margin-top: 20px;
+    margin-bottom: 20px;*/
+}
 /*
 Colour pallete
 heading colour:

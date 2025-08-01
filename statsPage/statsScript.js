@@ -2,6 +2,7 @@ let numberOfKnownWords = undefined;
 let numberOfLearningWords = undefined;
 let percentageKnownWords = undefined;
 let lang = undefined;
+let isFreeTranslationList = undefined;
 
 const languageDataList = [
   {lang:"ru", fullName: "Russian", src: "../assets/Flags/russianFlag.png"},
@@ -74,15 +75,21 @@ function SetLanguageTitle(){
   document.getElementById("languageName").textContent = fullName;
   document.getElementById("languageFlag").src = src;
 }
+function SetPremiumText(){
+  let textElement = document.getElementById("premiumText");  
+  textElement.hidden = isFreeTranslationList;  
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   numberOfKnownWords = message.numberOfKnownWords;
   numberOfLearningWords = message.numberOfLearningWords;
   percentageKnownWords = message.percentageKnownWords;
   lang = message.lang;
+  isFreeTranslationList = message.isFreeTranslationList;
   SetLanguageTitle();
   WriteStatsToPage();
   UpdateAllGraphs();
+  SetPremiumText();
 });
 //If the window is resized then redraw the graphs
 window.addEventListener('resize', function() {
