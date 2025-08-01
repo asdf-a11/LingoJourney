@@ -48,7 +48,10 @@ function WriteStatsToPage(){
   document.getElementById("knownWordsNumber").textContent = numberOfKnownWords.toString();
   //Can be null if stats page opened before translations are loaded
   if(percentageKnownWords != null){
-    document.getElementById("percentageKnownWords").textContent = (percentageKnownWords*100).toString();
+    const dpNumber = 2;
+    const dpScaler = Math.pow(10,dpNumber);
+    let roundedValue = Math.round((percentageKnownWords*100)*dpScaler) / dpScaler;
+    document.getElementById("percentageKnownWords").textContent = roundedValue.toString();
   }  
   else{
     document.getElementById("percentageKnownWords").textContent = "N/A";
