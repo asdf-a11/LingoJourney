@@ -48,6 +48,7 @@ let volumeLevel = 1;
 let fileNamesInDataBase = undefined;
 //
 let languageToAndFrom = undefined;
+let languageTo = undefined;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -69,10 +70,13 @@ function ActionMessage(request, sender, sendResponse){
   SendMessageToContentScript(request);
 }
 function LoadKnownAndLearningWords(){
+  if(languageTo === undefined){
+    console.error("Cannot load learning and known words untill langaugeTo is defiend");
+    return;
+  }
   chrome.storage.sync.get({
-    learningWordList: [],
-    knownWordList: []
   }, function(result) {
+    console.log(result);
     knownWordList = result.knownWordList;
     learningWordList = result.learningWordList;
   });
@@ -355,12 +359,42 @@ function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
     default:
       console.error("Invalid word Status when handling word status change -> ", newStatus);
   }
+  /*
   chrome.storage.sync.set({
     learningWordList: learningWordList,
     knownWordList: knownWordList
   }, function() {
     console.log("Updated word lists word " + targetWord + "  ,  " + newStatus);
   });
+  */
+ UpdateWordLists(targetWord, newStatus);
+}
+function UpdateWordLists(targetWord, newStatus){
+  if(languageTo === undefined){
+    console.error("Doesnt know what language to save wordlists for");
+    return;
+  }
+  chrome.storage.sync.get(null, function(data) {
+    // Make sure the object exists
+    const updatedData = data || {};
+
+    // Initialize language object if it doesn't exist
+    if (!updatedData[languageTo]) {
+      updatedData[languageTo] = {
+        knownWordList: [],
+        learningWordList: []
+      };
+    }
+
+    // Update only this language's word lists
+    updatedData[languageTo].knownWordList = knownWordList;
+    updatedData[languageTo].learningWordList = learningWordList;
+
+    // Save back only the updated language block
+    chrome.storage.sync.set({ [languageTo]: updatedData[languageTo] }, function() {
+      console.log("Updated word lists for '" + languageTo + "' with word: " + targetWord + " (" + newStatus + ")");
+    });
+  });  
 }
 async function DisplayTranslationWindow(targetWord, wordStatus){
   //If window allready open then close it
