@@ -342,8 +342,31 @@ function Wordify(argument){
   //Attach click event to all new buttons
   AssignFunctionToButtons(newButtons);
   buttonIdList = RemoveDeletedButtons(buttonIdList);
+  //Used in dev to make sure number of words in translations is satifactory
+  if(true){
+    CheckButtonIsInTranslationList(newButtons);
+  }
   //Add new buttons to button list
   buttonIdList = buttonIdList.concat(newButtons);
+}
+//Takes a wordified button and checks if it is in the translation list
+//If not set background colour to red
+function CheckButtonIsInTranslationList(newButtons){
+  for(let buttonId of newButtons){    
+    let lst = buttonId.split("-");
+    let targetWord = lst[1];
+    SendMessageToBackground({
+      type: "CheckWordInTranslationList",
+      targetLangWord: targetWord
+    }, function(response){
+      if(response.isInTranslationList === false){
+        let button = document.getElementById(buttonId);
+        if(button !== null){
+          button.style.backgroundColor = "red";
+        }        
+      }
+    });
+  }
 }
 //Updates whole page just once
 function UpdatePage(argument="whole"){

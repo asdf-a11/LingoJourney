@@ -79,14 +79,16 @@ function LoadKnownAndLearningWords(){
     //If doesnt not exist then set deaults
     knownWordList: [],
     learningWordList: [],
-    [lang]: []
+    [lang]: {knownWordList: [], learningWordList: []}
   }, function(result) {
     console.log("results ",result,lang);
     let oldRussianWordsKnown = result.knownWordList;
     let oldRussianWordsLearning = result.learningWordList;
     knownWordList = result[lang].knownWordList;
     learningWordList = result[lang].learningWordList;
-
+    //Backwards compatibility knownWords and learningWords can be null/undefined
+    if(knownWordList == null){knownWordList = [];}
+    if(learningWordList == null){learningWordList = [];}
     //Check for backwards compatibility
     if(lang === "ru"){
       if(oldRussianWordsKnown.length > 0 || oldRussianWordsLearning > 0){
@@ -560,6 +562,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           console.log("here", fileNameList);
           sendResponse({premiumList: fileNameList});
         });        
+        break;
+      case "CheckWordInTranslationList":
+        console.log("my print statment,", request.targetLangWord);
+        let value = GetTranslation(request.targetLangWord);
+        sendResponse({isInTranslationList: value.short!=="..."});
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":
