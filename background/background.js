@@ -294,6 +294,11 @@ function CompareStrings(string1, string2, threshold){
 function GetClosestString(searchString, stringList, threshold){
   let indexList = [];
   for(let i = 0; i < stringList.length; i++){
+    //Compare doesnt work so well for single character words 
+    //provides protection agains weird characters like :
+    if(searchString.length === 1){
+      continue;
+    }
     let totalCost = CompareStrings(searchString, stringList[i], threshold);
     if(totalCost != -1){
       indexList.push({
@@ -563,10 +568,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           sendResponse({premiumList: fileNameList});
         });        
         break;
-      case "CheckWordInTranslationList":
-        console.log("my print statment,", request.targetLangWord);
+      case "CheckWordInTranslationList":        
         let value = GetTranslation(request.targetLangWord);
-        sendResponse({isInTranslationList: value.short!=="..."});
+        let notExists = value.short==="..." || value.paragraph==="In full translation list" || value.approxAsWord != undefined;
+        console.log("my print statment,", request.targetLangWord, value, notExists);
+        sendResponse({isInTranslationList: !notExists});
         break;
       case "StartUpdatePage":
       case "StartUpdatePageRoutine":
