@@ -62,7 +62,7 @@ function RemoveAllAccents(string){
 function ReplaceWithSpace(content){
   const repList = [
     "-",".",",","?","!", "[","]","&","#","@", "-", "_", "(", ")", "\"", "\'", ":", ";",
-    "«", "»", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
+    "«", "»", //"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
     "\n", "\t",
     "\u00A0" // non-breaking space
   ];
@@ -298,6 +298,18 @@ function RemoveDeletedButtons(buttonIdList){
   }
   return buttonIdList;
 }
+function IsNonWordString(string){
+  const charList = "0123456789[]{}@#~/?\\|,<.>!\"£$%^&*()¬`_-+=«»„“”‘’–—‒…‐‑§¶;:¥₩₽₹€⁄×";
+  for(let char of string){
+    for(let i of charList){
+      if(i===char){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 //Turns text on the webpage to buttons
 //takes whether to do whole page or just youtube sutitles as a string
 function Wordify(argument){
@@ -320,21 +332,33 @@ function Wordify(argument){
     //Loop over each word in the current element
     for(let i = 0; i < wordList.length; i++){
       if(wordList[i].length == 0){ continue; }
-      let newButton = document.createElement('button');
-      newButton.textContent = wordList[i];      
-      let wordType = GetWordType(wordList[i]);
-      let buttonIdString = BUTTON_ID_STRING+"-".concat(newButton.textContent)+"-".concat(wordType)+"-".concat(buttonIdCounter.toString());
-      newButton.id = buttonIdString; 
-      ApplyStyleSettings(newButton, currentElementStyle);        
-      newButton.style.backgroundColor = GetWordColour(wordType);
-      newButton.style.border = "none";
-      newButton.style.padding = "1px 0.25em";
-      newButton.style.textAlign= "center";
-      newButton.style.margin= "0px 0px";
-      newButton.style.cursor= "pointer";
-      newButtons.push(newButton.id);
-      currentElement.appendChild(newButton);
-      buttonIdCounter++;
+      //Dont want to wordify numbers of punctuation or emojes ect
+      let isNonWordString = IsNonWordString(wordList[i]);
+      if(isNonWordString){
+        let newElement = document.createElement("span");
+        let s = wordList[i];
+        s += " ";        
+        newElement.textContent = s;
+        ApplyStyleSettings(newElement, currentElementStyle);    
+        currentElement.appendChild(newElement);
+      }
+      else{
+        let newButton = document.createElement('button');
+        newButton.textContent = wordList[i];      
+        let wordType = GetWordType(wordList[i]);
+        let buttonIdString = BUTTON_ID_STRING+"-".concat(newButton.textContent)+"-".concat(wordType)+"-".concat(buttonIdCounter.toString());
+        newButton.id = buttonIdString; 
+        ApplyStyleSettings(newButton, currentElementStyle);        
+        newButton.style.backgroundColor = GetWordColour(wordType);
+        newButton.style.border = "none";
+        newButton.style.padding = "1px 0.25em";
+        newButton.style.textAlign= "center";
+        newButton.style.margin= "0px 0px";
+        newButton.style.cursor= "pointer";
+        newButtons.push(newButton.id);
+        currentElement.appendChild(newButton);
+        buttonIdCounter++;
+      }
       //Stop id counting to rediculus numbers
       if(buttonIdCounter > 1000000){buttonIdCounter=0;}
     } 
