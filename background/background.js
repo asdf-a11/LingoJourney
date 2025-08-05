@@ -320,12 +320,25 @@ function GetClosestString(searchString, stringList, threshold){
   }
   return undefined;
 }
+function RemoveAllAccents(string){
+  let decomposedString = string.normalize("NFD");
+  let allowedCharacters = [
+    "й"
+  ];
+  for(const c of allowedCharacters){
+    decomposedString = decomposedString.replace(c.normalize("NFD"), c.normalize("NFC"));
+  }
+  decomposedString = decomposedString.replace(/[\u0300-\u036f]/g, "");
+  return decomposedString;
+}
 function GetTranslation(wordName){
   if(translationInfo == null){
     console.error("Translation info is not set");
   }
+  let wordToFind = RemoveAllAccents(wordName);
   for(let i = 0; i < translationInfo.length; i++){
-    if(translationInfo[i].targetLangWord === wordName){
+    let wordInTranslations = RemoveAllAccents(translationInfo[i].targetLangWord);    
+    if(wordInTranslations === wordToFind){
       return {
         paragraph: translationInfo[i].description,
         short: translationInfo[i].transWords,

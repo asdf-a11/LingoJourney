@@ -46,6 +46,7 @@ function AddIfNotAllreadyIn(arr, item){
   return arr;
 }
 //Removes all the accents from a string
+/*
 function RemoveAllAccents(string){
   let decomposedString = string.normalize("NFD");
   let allowedCharacters = [
@@ -57,6 +58,7 @@ function RemoveAllAccents(string){
   decomposedString = decomposedString.replace(/[\u0300-\u036f]/g, "");
   return decomposedString;
 }
+  */
 //Puts spaces either side of each character
 //stops words contain punctuation
 function ReplaceWithSpace(content){
@@ -325,12 +327,13 @@ function Wordify(argument){
     //All gramatical characters have spaces put round them
     text = ReplaceWithSpace(text);
     //Removes all the accents from the text
-    text = RemoveAllAccents(text);
+    //text = RemoveAllAccents(text);
     const wordList = text.split(" ");
     //Remove original text to replace with buttons
     RemoveTextNodes(currentElement);
     //Loop over each word in the current element
     for(let i = 0; i < wordList.length; i++){
+      wordList[i] = wordList[i].trim();
       if(wordList[i].length == 0){ continue; }
       //Dont want to wordify numbers of punctuation or emojes ect
       let isNonWordString = IsNonWordString(wordList[i]);
