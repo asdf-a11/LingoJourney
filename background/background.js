@@ -337,8 +337,8 @@ function GetTranslation(wordName){
   }
   let wordToFind = RemoveAllAccents(wordName);
   for(let i = 0; i < translationInfo.length; i++){
-    let wordInTranslations = RemoveAllAccents(translationInfo[i].targetLangWord);    
-    if(wordInTranslations === wordToFind){
+    //let wordInTranslations = RemoveAllAccents(translationInfo[i].targetLangWord);    
+    if(translationInfo[i].targetLangWord === wordToFind){
       return {
         paragraph: translationInfo[i].description,
         short: translationInfo[i].transWords,
