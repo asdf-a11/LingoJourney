@@ -378,7 +378,8 @@ function Wordify(argument){
         s += " ";        
         newElement.textContent = s;
         ApplyStyleSettings(newElement, currentElementStyle);   
-        newElement.style.backgroundColor = "rgb(30,30,255)"; 
+        //For debugging words that are not considerd to be in the target language.
+        //newElement.style.backgroundColor = "rgb(30,30,255)"; 
         currentElement.appendChild(newElement);
       }
       else{
