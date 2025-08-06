@@ -1,5 +1,5 @@
 # LingoJourney
- ![alt text](assets/Logo128.png)
+ ![alt text](assets/LingoJourneyLogo.png)
  <hr>
  This is the reposity for the Lingo Journey chrome extension (https://chromewebstore.google.com/detail/lingo-journey/hkkghimlnkomhmnndmnnidbpilokcaeo).
  
@@ -7,8 +7,9 @@
 
 ## Languages supported
 - Russian
+- German
+- Spanish
 <br>
-*Support for German and many more planned in the near future*
 
 ## Screenshots
 
@@ -35,4 +36,4 @@ Wordify Youtube does this but on repeat and only for subtitle element on youtube
 
 ## Paid translations
 
-Lingo Journey comes with a incomplete translation list to help you decide if Lingo Journey is the tool for you. If you find Lingo Journey usefull then I strongly suggesting getting the complete translations from the Lingo Journey patreon (TODO).
+Lingo Journey comes with a incomplete translation list to help you decide if Lingo Journey is the tool for you. If you find Lingo Journey usefull then I strongly suggesting getting the complete translations from the Lingo Journey patreon (https://patreon.com/LingoJourney).

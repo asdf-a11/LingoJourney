@@ -327,12 +327,9 @@ function IsNonWordString(string){
 function WordIsOfAnotherLanguage(string){
   string = string.toLowerCase();
   let validCharList = undefined;
-  //Makes letters with accents comperable
-  //const normalizeCharList = list => list.map(char => char.normalize('NFC'));
   switch(languageName){
     case "ru":
       validCharList = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-      //"задачей" 
       break;
     case "es":
       validCharList = "abcdefghijklmnñopqrstuvwxyz";
@@ -344,6 +341,7 @@ function WordIsOfAnotherLanguage(string){
   if(validCharList === undefined){
     console.error("Not a valid language name -> ", languageName);
   }
+  //Makes letters with accents comperable
   string = string.normalize("NFC");
   validCharList = validCharList.normalize("NFC");
   for(let char of string){
