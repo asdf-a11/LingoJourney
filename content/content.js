@@ -348,7 +348,7 @@ function WordIsOfAnotherLanguage(string){
   validCharList = validCharList.normalize("NFC");
   for(let char of string){
     if(validCharList.includes(char) == false){
-      console.log("char",char);
+      console.log("char",char, char.charCodeAt(0));
       return true;
     }
   }
@@ -371,6 +371,8 @@ function Wordify(argument){
     text = ReplaceWithSpace(text);
     //Removes all the accents from the text
     text = RemoveAccents(text);
+    //Remove soft hyphens
+    text = text.replaceAll(String.fromCharCode(173), "");
     const wordList = text.split(" ");
     //Remove original text to replace with buttons
     RemoveTextNodes(currentElement);
