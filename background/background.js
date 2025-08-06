@@ -79,16 +79,18 @@ function LoadKnownAndLearningWords(){
     //If doesnt not exist then set deaults
     knownWordList: [],
     learningWordList: [],
-    [lang]: {knownWordList: [], learningWordList: []}
+    [lang]: {knownWordList: [], learningWordList: [], ignoreWordList: []}
   }, function(result) {
     console.log("results ",result,lang);
     let oldRussianWordsKnown = result.knownWordList;
     let oldRussianWordsLearning = result.learningWordList;
     knownWordList = result[lang].knownWordList;
     learningWordList = result[lang].learningWordList;
+    ignoreWordList = result[lang].ignoreWordList;
     //Backwards compatibility knownWords and learningWords can be null/undefined
     if(knownWordList == null){knownWordList = [];}
     if(learningWordList == null){learningWordList = [];}
+    if(ignoreWordList == null){ignoreWordList = [];}
     //Check for backwards compatibility
     if(lang === "ru"){
       if(oldRussianWordsKnown.length > 0 || oldRussianWordsLearning > 0){
@@ -396,6 +398,11 @@ function UpdateStatusOfWord(targetWord, prevStatus, newStatus){
         knownWordList.splice(index, 1);
       }
       break;
+    case "ignore":
+      if(ignoreWordList.indexOf(targetWord) == -1){//needs to be added to learinging List
+        ignoreWordList.push(targetWord);
+      }
+      //Fall through to make sure it is not in either other list
     case "unknown":
       knownWordList = RemoveItemOnce(knownWordList, targetWord);
       learningWordList = RemoveItemOnce(learningWordList, targetWord);
@@ -418,13 +425,15 @@ function UpdateWordLists(targetWord, newStatus){
     if (!updatedData[lang]) {
       updatedData[lang] = {
         knownWordList: [],
-        learningWordList: []
+        learningWordList: [],
+        ignoreWordList: []
       };
     }
 
     // Update only this language's word lists
     updatedData[lang].knownWordList = knownWordList;
     updatedData[lang].learningWordList = learningWordList;
+    updatedData[lang].ignoreWordList = ignoreWordList;
 
     // Save back only the updated language block
     chrome.storage.sync.set({ [lang]: updatedData[lang] }, function() {
@@ -615,6 +624,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             if(response.answer == false){//send both known word list and learning word list
               await SendLargeArrayToContentScript("SendKnownListSection", knownWordList);
               await SendLargeArrayToContentScript("SendLearningListSection", learningWordList);
+              await SendLargeArrayToContentScript("SendIgnoreListSection", ignoreWordList);
             }
             SendMessageToContentScript({
               type: "SendTranslationWindowHTML",

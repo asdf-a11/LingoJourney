@@ -1,6 +1,7 @@
 //Stores the list of all known and learning words in a array
 var knownWordList = undefined;
 var learningWordList = undefined;
+let ignoreWordList = undefined;
 //How often the youtube subtitles are updated
 const youtube_refreshRate = 500;//ms
 //How often the entire page is updated
@@ -158,18 +159,16 @@ function ApplyStyleSettings(element, styleSettings){
 }
 //Returns which status a word has
 function GetWordType(word){
-  if(knownWordList.includes(word)){
-    return "known";
-  }
-  if(learningWordList.includes(word)){
-    return "learning";
-  }
+  if(knownWordList.includes(word)){ return "known"; }
+  if(learningWordList.includes(word)){ return "learning"; }
+  if(ignoreWordList.includes(word)){ return "ignore"; }
   return "unknown";
 }
 //Takes in the status of a word and returns
 //the corrisponding colour for that status
 function GetWordColour(wordType){
   switch(wordType){
+    case "ignore":
     case "known":
       return "rgba(255, 200, 180, 0.0)";
     case "learning":
@@ -191,7 +190,7 @@ function GetTranslation(wordName){
 //Check if word contains any numbers or punctuation
 //returns true if it does not
 function IsValidWord(word){
-  let invalidList = ",<.>/?\'@;:]}[{=+-_)(*&^%$£\"1`¬\\|1234567890#~«»";
+  let invalidList = ",<.>/?\'@;:]}[{=+-_)(*&^%$£\"`¬\\|1234567890#~«»";
   for(let i of invalidList){
     if (word.indexOf(i) > -1){
       return false;
@@ -211,6 +210,9 @@ function SetWordStatus(word, wordStatus){
       knownWordList = knownWordList.filter(e => e !== word);
       learningWordList = AddIfNotAllreadyIn(learningWordList, word);
       break;
+    case "ignore":
+      ignoreWordList = AddIfNotAllreadyIn(ignoreWordList, word);
+      //Fall through because it might be in the other words lists and needs to be removed
     case "unknown":
       learningWordList = RemoveItemFromArray(learningWordList, word);
       knownWordList = RemoveItemFromArray(knownWordList, word);
@@ -221,7 +223,7 @@ function SetWordStatus(word, wordStatus){
 }
 //After a word has changed status needs to go over all words and update them
 //because their word colour might need to change
-function UpdateAllButtonColours(targetWord, typeName, buttonIdList){  
+function UpdateAllButtons(targetWord, typeName, buttonIdList){  
   let newColour = GetWordColour(typeName);
   for(let i = 0; i < buttonIdList.length; i++){   
     let e = document.getElementById(buttonIdList[i]);
@@ -229,8 +231,14 @@ function UpdateAllButtonColours(targetWord, typeName, buttonIdList){
     if(e === null){ continue; }    
     let splitList = buttonIdList[i].split("-");
     let buttonsTargetWord = splitList[1];
-    if(targetWord == buttonsTargetWord){
-      e.style.backgroundColor = newColour;      
+    if(targetWord === buttonsTargetWord){
+      e.style.backgroundColor = newColour;  
+      //Update word type stored in the buttons id
+      let newSplitList = splitList;
+      newSplitList[2] = typeName;
+      let newId = newSplitList.join("-");
+      e.id = newId;
+      buttonIdList[i] = newId; 
     }
   }
 }
@@ -259,7 +267,7 @@ function CloseTranslationWindowRoutine(popupWindow, buttonIdList){
       word: targetWord,
       wordStatus: newWordStatus
     });
-    UpdateAllButtonColours(targetWord, newWordStatus, buttonIdList);
+    UpdateAllButtons(targetWord, newWordStatus, buttonIdList);
   }
   else{
     console.log("Word contains invlid characters therefore status is not being updated.");
@@ -473,17 +481,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     //Sends a section of the known word list from the background script
     case "SendKnownListSection":
-      if(knownWordList === undefined){
-        knownWordList = [];
-      }  
+      if(knownWordList === undefined){ knownWordList = []; }  
       knownWordList = knownWordList.concat(request.listSection);  
       break;
     //Sends a section of the learning list from the background script
     case "SendLearningListSection":
-      if(learningWordList === undefined){
-        learningWordList = [];
-      }   
+      if(learningWordList === undefined){ learningWordList = []; }   
       learningWordList = learningWordList.concat(request.listSection);
+      break;
+    case "SendIgnoreListSection":
+      if(ignoreWordList === undefined){ignoreWordList = []; }
+      ignoreWordList = ignoreWordList.concat(request.listSection);
       break;
     //Sends the translation list in chuncks
     case "SendTranslationInfoSection":
@@ -494,7 +502,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     case "UpdateWordColours":
       SetWordStatus(request.targetLangWord, request.newWordStatus);
-      UpdateAllButtonColours(request.targetLangWord, request.newWordStatus, buttonIdList);
+      UpdateAllButtons(request.targetLangWord, request.newWordStatus, buttonIdList);
       break;
     //Wordifies the page
     case "StartUpdatePage":

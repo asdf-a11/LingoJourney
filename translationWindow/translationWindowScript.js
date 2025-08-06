@@ -22,7 +22,8 @@ function SetButtonColour(){
     let buttonNameList = [
         "learningButton", 
         "knownButton",
-        "unknownButton"
+        "unknownButton",
+        "ignoreButton"
     ];
     for(let i in buttonNameList){
         document.getElementById(buttonNameList[i]).className = "wordStatusButton_notSelected";
@@ -39,6 +40,7 @@ function AttachClickFunctionToButtons(){
     document.getElementById("learningButton").onclick = function(){OnWordStatusButtonClicked("learning");};
     document.getElementById("knownButton").onclick = function(){OnWordStatusButtonClicked("known");};
     document.getElementById("unknownButton").onclick = function(){OnWordStatusButtonClicked("unknown");};
+    document.getElementById("ignoreButton").onclick = function(){OnWordStatusButtonClicked("ignore");};
 }
 function ShowMessageIfFreeTranslationList(){
     if(isUsingFreeTranslationList === true){
