@@ -267,6 +267,8 @@ async function SendLargeArrayToContentScript(messageTypeName, arrayToSend){
 }
 //-1 if above threshold else returns the total cost (higher is worse)
 function CompareStrings(string1, string2, threshold){
+  string1 = string1.normalize("NFD");
+  string2 = string2.normalize("NFD");
   const WRONG_LETTER_COST = 3.0;
   const TOO_SHORT_COST = 1.0;
   const OVERWEIGHT_FRONT = 0.2;
@@ -320,6 +322,7 @@ function GetClosestString(searchString, stringList, threshold){
   }
   return undefined;
 }
+/*
 function RemoveAllAccents(string){
   let decomposedString = string.normalize("NFD");
   let allowedCharacters = [
@@ -331,14 +334,17 @@ function RemoveAllAccents(string){
   decomposedString = decomposedString.replace(/[\u0300-\u036f]/g, "");
   return decomposedString;
 }
+  */
 function GetTranslation(wordName){
   if(translationInfo == null){
     console.error("Translation info is not set");
   }
-  let wordToFind = RemoveAllAccents(wordName);
+  //let wordToFind = RemoveAllAccents(wordName);
+  wordName = wordName.normalize("NFD");
   for(let i = 0; i < translationInfo.length; i++){
     //let wordInTranslations = RemoveAllAccents(translationInfo[i].targetLangWord);    
-    if(translationInfo[i].targetLangWord === wordToFind){
+    let string = translationInfo[i].targetLangWord.normalize("NFD");
+    if(string === wordName){
       return {
         paragraph: translationInfo[i].description,
         short: translationInfo[i].transWords,
@@ -584,7 +590,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       case "CheckWordInTranslationList":        
         let value = GetTranslation(request.targetLangWord);
         let notExists = value.short==="..." || value.paragraph==="In full translation list" || value.approxAsWord != undefined;
-        console.log("my print statment,", request.targetLangWord, value, notExists);
+        //console.log("my print statment,", request.targetLangWord, value, notExists);
         sendResponse({isInTranslationList: !notExists});
         break;
       case "StartUpdatePage":
@@ -618,6 +624,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               type: "IsFreeTranslationList",
               isUsingFreeTranslationList: isUsingFreeTranslationList
             });
+            SendMessageToContentScript({
+              type: "SendLanguageName",
+              languageName: lang
+            })
             ActionMessage(request, sender, sendResponse);
           });
         });   

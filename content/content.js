@@ -27,6 +27,8 @@ var translationWindowHTML = undefined;
 var buttonIdList = [];
 //Counter to make sure buttons have unique id (resets at 1000000)
 let buttonIdCounter = 0;
+//
+let languageName = undefined;
 
 //Remove one item from the array
 function RemoveItemFromArray(arr, item){  
@@ -46,8 +48,9 @@ function AddIfNotAllreadyIn(arr, item){
   return arr;
 }
 //Removes all the accents from a string
-/*
-function RemoveAllAccents(string){
+
+function RemoveAccents(string){
+  /*
   let decomposedString = string.normalize("NFD");
   let allowedCharacters = [
     "й"
@@ -57,8 +60,10 @@ function RemoveAllAccents(string){
   }
   decomposedString = decomposedString.replace(/[\u0300-\u036f]/g, "");
   return decomposedString;
-}
   */
+  return string.normalize("NFD").replace(/[\u0301]/g, '');
+}
+
 //Puts spaces either side of each character
 //stops words contain punctuation
 function ReplaceWithSpace(content){
@@ -311,6 +316,36 @@ function IsNonWordString(string){
   }
   return false;
 }
+function WordIsOfAnotherLanguage(string){
+  string = string.toLowerCase();
+  let validCharList = undefined;
+  //Makes letters with accents comperable
+  //const normalizeCharList = list => list.map(char => char.normalize('NFC'));
+  switch(languageName){
+    case "ru":
+      validCharList = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+      //"задачей" 
+      break;
+    case "es":
+      validCharList = "abcdefghijklmnñopqrstuvwxyz";
+      break;
+    case "de":
+      validCharList = "abcdefghijklmnopqrstuvwxyzäöüß";
+      break;      
+  }
+  if(validCharList === undefined){
+    console.error("Not a valid language name -> ", languageName);
+  }
+  string = string.normalize("NFC");
+  validCharList = validCharList.normalize("NFC");
+  for(let char of string){
+    if(validCharList.includes(char) == false){
+      console.log("char",char);
+      return true;
+    }
+  }
+  return false;
+}
 
 //Turns text on the webpage to buttons
 //takes whether to do whole page or just youtube sutitles as a string
@@ -327,7 +362,7 @@ function Wordify(argument){
     //All gramatical characters have spaces put round them
     text = ReplaceWithSpace(text);
     //Removes all the accents from the text
-    //text = RemoveAllAccents(text);
+    text = RemoveAccents(text);
     const wordList = text.split(" ");
     //Remove original text to replace with buttons
     RemoveTextNodes(currentElement);
@@ -336,13 +371,14 @@ function Wordify(argument){
       wordList[i] = wordList[i].trim();
       if(wordList[i].length == 0){ continue; }
       //Dont want to wordify numbers of punctuation or emojes ect
-      let isNonWordString = IsNonWordString(wordList[i]);
-      if(isNonWordString){
+      let dontWordifyWord = IsNonWordString(wordList[i]) || WordIsOfAnotherLanguage(wordList[i]);
+      if(dontWordifyWord){
         let newElement = document.createElement("span");
         let s = wordList[i];
         s += " ";        
         newElement.textContent = s;
-        ApplyStyleSettings(newElement, currentElementStyle);    
+        ApplyStyleSettings(newElement, currentElementStyle);   
+        newElement.style.backgroundColor = "rgb(30,30,255)"; 
         currentElement.appendChild(newElement);
       }
       else{
@@ -430,6 +466,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //Check if it has the known and learning word list
     case "HasKnownWordList":
       sendResponse({answer: (knownWordList !== undefined)});
+      break;
+    case "SendLanguageName":
+      languageName = request.languageName; 
       break;
     //Sends a section of the known word list from the background script
     case "SendKnownListSection":
