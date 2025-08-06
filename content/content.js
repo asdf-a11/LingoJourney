@@ -348,7 +348,7 @@ function WordIsOfAnotherLanguage(string){
   validCharList = validCharList.normalize("NFC");
   for(let char of string){
     if(validCharList.includes(char) == false){
-      console.log("char",char, char.charCodeAt(0));
+      //console.log("char",char, char.charCodeAt(0));
       return true;
     }
   }
