@@ -12,9 +12,9 @@ let premiumList = undefined;
 const languageList = [
     //name:(from language to language) imgPath: (path to flag image to display in popup) free...:(Path rel to LanguageData to find file) 
     //paid...: name of paid file in indexdb database lang: The language the user is truing to learn 
-    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.bin", paidTranslationFileName: "RUtoEN_paid.txt", lang: "ru"},
-    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "EStoEN_free.bin", paidTranslationFileName: "EStoEN_paid.txt", lang: "es"},
-    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "DEtoEN_free.bin", paidTranslationFileName: "DEtoEN_paid.txt",  lang: "de"}
+    {name: "RUtoEN", imgPath: "russianFlag.png", freeTranslationPath: "RUtoEN_free.bin", paidTranslationFileName: "RUtoEN_paid.bin", lang: "ru"},
+    {name: "EStoEN", imgPath: "spanishFlag.png", freeTranslationPath: "EStoEN_free.bin", paidTranslationFileName: "EStoEN_paid.bin", lang: "es"},
+    {name: "DEtoEN", imgPath: "germanFlag.png", freeTranslationPath: "DEtoEN_free.bin", paidTranslationFileName: "DEtoEN_paid.bin",  lang: "de"}
 ];
 
 function SelectALanguage(languageData){
