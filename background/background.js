@@ -131,6 +131,7 @@ function DecodeTranslationFile(string){
     "English", //"Russian",
     "The Spanish word ",
     " translates to ",
+    "The German word"
     //" when ", " used ", " word ", " have ", " that ", " the ", " meaning ", " term ",
     //" is ", " not ", " a "," and ", " in ", " it ", " they ", " from ", " or ", " to ", "ing ",
     //", -0.0", ", 0.0"
