@@ -43,7 +43,7 @@ function AttachClickFunctionToButtons(){
     document.getElementById("ignoreButton").onclick = function(){OnWordStatusButtonClicked("ignore");};
 }
 function ShowMessageIfFreeTranslationList(){
-    if(isUsingFreeTranslationList === true){
+    if(isUsingFreeTranslationList == true){
         document.getElementById("UsingFreeTranslationList").hidden = false;
     }
 }

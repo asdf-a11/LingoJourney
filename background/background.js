@@ -216,8 +216,10 @@ async function LoadTranslations(freeTranslationFileName, paidTranslationFileName
   isFreeTranslationList = false;
   //Search indexdb for paid translation file if so set translationFileString
   let translationFileString = await LoadFromDataBase(paidTranslationFileName);
-  if(translationFileString === undefined){
-    //This means paid translations are not installed therefore read from disk    
+  isUsingFreeTranslationList = false;
+  if(translationFileString === undefined){    
+    //This means paid translations are not installed therefore read from disk  
+    isUsingFreeTranslationList = true;  
     let filePath = "LanguageData/"+freeTranslationFileName;
     console.log("Loading free translations from disk", filePath);
     let link = chrome.runtime.getURL(filePath);
