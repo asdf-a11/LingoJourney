@@ -14,7 +14,7 @@
         "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'"
     },
     "icons": {
-	    "128": "assets/Logo128.png"
+	    "128": "assets/LingoJourneyLogo128.png"
     },
     "content_scripts": [
         {

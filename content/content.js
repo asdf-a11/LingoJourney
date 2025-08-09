@@ -415,7 +415,7 @@ function Wordify(argument){
   AssignFunctionToButtons(newButtons);
   buttonIdList = RemoveDeletedButtons(buttonIdList);
   //Used in dev to make sure number of words in translations is satifactory
-  if(true){
+  if(false){
     CheckButtonIsInTranslationList(newButtons);
   }
   //Add new buttons to button list
