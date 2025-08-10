@@ -2,6 +2,8 @@
 var knownWordList = undefined;
 var learningWordList = undefined;
 let ignoreWordList = undefined;
+//Stores list of all redacted words, to mark them in gold colour to user
+let premiumOnlyWordList = undefined;
 //How often the youtube subtitles are updated
 const youtube_refreshRate = 500;//ms
 //How often the entire page is updated
@@ -353,6 +355,23 @@ function WordIsOfAnotherLanguage(string){
   return false;
 }
 
+function SetPremiumButtonColours(buttonIdList){
+  if(premiumOnlyWordList === undefined){
+    console.error("Premium word list is undefined when trying to set button colours");
+    return;
+  }
+  for(let buttonId of buttonIdList){
+    let splitList = buttonId.split("-");
+    let targetWord = splitList[1];
+    if(premiumOnlyWordList.includes(targetWord)){
+      let button = document.getElementById(buttonId);
+      if(button !== null){
+        button.style.backgroundColor = "gold";
+      }
+    }
+  }
+}
+
 //Turns text on the webpage to buttons
 //takes whether to do whole page or just youtube sutitles as a string
 function Wordify(argument){
@@ -414,6 +433,8 @@ function Wordify(argument){
   //Attach click event to all new buttons
   AssignFunctionToButtons(newButtons);
   buttonIdList = RemoveDeletedButtons(buttonIdList);
+  //If word is redacted for premium only then show it in gold colour
+  SetPremiumButtonColours(newButtons);
   //Used in dev to make sure number of words in translations is satifactory
   if(false){
     CheckButtonIsInTranslationList(newButtons);
@@ -492,6 +513,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "SendIgnoreListSection":
       if(ignoreWordList === undefined){ignoreWordList = []; }
       ignoreWordList = ignoreWordList.concat(request.listSection);
+      break;
+    case "SendPremiumOnlyListSection":
+      if(premiumOnlyWordList === undefined){premiumOnlyWordList = []; }
+      premiumOnlyWordList = premiumOnlyWordList.concat(request.listSection);
       break;
     //Sends the translation list in chuncks
     case "SendTranslationInfoSection":

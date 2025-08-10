@@ -50,6 +50,8 @@ let fileNamesInDataBase = undefined;
 //let languageToAndFrom = undefined;
 //let languageTo = undefined;
 let lang = undefined;
+//
+let premiumOnlyWordList = undefined;
 
 //TODO code duplication
 //Copied from popup/script.js
@@ -76,7 +78,7 @@ function LoadKnownAndLearningWords(){
     return;
   }
   chrome.storage.sync.get({
-    //If doesnt not exist then set deaults
+    //If doesnt not exist then set defaults
     knownWordList: [],
     learningWordList: [],
     [lang]: {knownWordList: [], learningWordList: [], ignoreWordList: []}
@@ -210,6 +212,19 @@ async function GetFileNamesFromDataBase(){
     };
   });
 }
+function SetPremiumOnlyWordList(){
+  if(translationInfo == undefined){
+    console.error("Translation info not set when trying to set premo only words");
+    return;
+  }
+  premiumOnlyWordList = [];
+  for(let i of translationInfo){
+    if(i.description.includes("In full translation list")){
+      premiumOnlyWordList.push(i.targetLangWord);
+    }
+  }
+  console.log("Number of premium only words: ", premiumOnlyWordList.length);
+}
 async function LoadTranslations(freeTranslationFileName, paidTranslationFileName, sendResponse){
   //Checks if user is using free translation list and sets bool acordingly
   console.log("Loading translation of file ", freeTranslationFileName, paidTranslationFileName);
@@ -244,6 +259,7 @@ async function LoadTranslations(freeTranslationFileName, paidTranslationFileName
       translationTargetWordNameList.push(i.targetLangWord);
     }
   }
+  SetPremiumOnlyWordList();  
   sendResponse({
     type: "LoadingTranslationDataSucc", status: translationFileString!==undefined,
     isFreeTranslationList: isFreeTranslationList
@@ -628,6 +644,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               await SendLargeArrayToContentScript("SendKnownListSection", knownWordList);
               await SendLargeArrayToContentScript("SendLearningListSection", learningWordList);
               await SendLargeArrayToContentScript("SendIgnoreListSection", ignoreWordList);
+              await SendLargeArrayToContentScript("SendPremiumOnlyListSection", premiumOnlyWordList);
             }
             SendMessageToContentScript({
               type: "SendTranslationWindowHTML",
